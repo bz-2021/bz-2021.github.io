@@ -1,0 +1,829 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>最长上升子序列模型</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="e750e5a7-ed22-42ef-bf54-c105119204e2" class="page sans"><header><img class="page-cover-image" src="https://www.notion.so/images/page-cover/nasa_the_blue_marble.jpg" style="object-position:center 50%"/><div class="page-header-icon page-header-icon-with-cover"><span class="icon">↗️</span></div><h1 class="page-title">最长上升子序列模型</h1></header><div class="page-body"><p id="70f5a32a-46a9-4653-8586-a50a7e0776a7" class=""><strong>最长上升子序列</strong>（Longest Increasing Subsequence）</p><figure id="046ac364-15f4-4ab2-9370-4bf6a501183b" class="image" style="text-align:left"><a href="%E6%9C%80%E9%95%BF%E4%B8%8A%E5%8D%87%E5%AD%90%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B%20e750e5a7ed2242efbf54c105119204e2/%25E6%259C%2580%25E9%2595%25BF%25E4%25B8%258A%25E5%258D%2587%25E5%25AD%2590%25E5%25BA%258F%25E5%2588%2597%25E9%2597%25AE%25E9%25A2%2598_(1).png"><img style="width:624px" src="%E6%9C%80%E9%95%BF%E4%B8%8A%E5%8D%87%E5%AD%90%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B%20e750e5a7ed2242efbf54c105119204e2/%25E6%259C%2580%25E9%2595%25BF%25E4%25B8%258A%25E5%258D%2587%25E5%25AD%2590%25E5%25BA%258F%25E5%2588%2597%25E9%2597%25AE%25E9%25A2%2598_(1).png"/></a></figure><h3 id="af7cc113-c7be-45ff-9a95-c4f708e3afcf" class=""><details open=""><summary><a href="https://www.acwing.com/activity/content/problem/content/1259/"><strong><strong>1017. 怪盗基德的滑翔翼</strong></strong></a></summary></details></h3><div class="indented"><ul id="72ade037-9dc9-4c8a-96a3-3b9e7ca494ab" class="toggle"><li><details open=""><summary>题目</summary><p id="21223db7-5f26-42c7-b9da-03caca17277a" class="">怪盗基德是一个充满传奇色彩的怪盗，专门以珠宝为目标的超级盗窃犯。</p><p id="e652189a-14d3-425e-bb00-df54015a1ede" class="">而他最为突出的地方，就是他每次都能逃脱中村警部的重重围堵，而这也很大程度上是多亏了他随身携带的便于操作的滑翔翼。</p><p id="a5afe895-23f3-4905-a974-33cb16022466" class="">有一天，怪盗基德像往常一样偷走了一颗珍贵的钻石，不料却被柯南小朋友识破了伪装，而他的滑翔翼的动力装置也被柯南踢出的足球破坏了。</p><p id="d4ef2594-58bc-4557-b085-220dbe12f5e0" class="">不得已，怪盗基德只能操作受损的滑翔翼逃脱。</p><p id="cc1bed1c-ba60-4e5d-9365-61c2b51bbb48" class="">假设城市中一共有N幢建筑排成一条线，每幢建筑的高度各不相同。</p><p id="8f1dcfa9-7e2f-450f-ab02-10bd250edc3d" class="">初始时，怪盗基德可以在任何一幢建筑的顶端。</p><p id="ce5f1ca6-28d5-4333-9e3e-4caeccbbd773" class="">他可以选择一个方向逃跑，但是不能中途改变方向（因为中森警部会在后面追击）。</p><p id="b048fcbc-fd06-4dab-814d-9a1758f789eb" class="">因为滑翔翼动力装置受损，他只能往下滑行（即：只能从较高的建筑滑翔到较低的建筑）。</p><p id="fa9d47fc-63d9-4c20-a4ae-38fe73d8c0f9" class="">他希望尽可能多地经过不同建筑的顶部，这样可以减缓下降时的冲击力，减少受伤的可能性。</p><p id="4f313d81-876e-4713-bc21-f6240cf8e4f5" class="">请问，他最多可以经过多少幢不同建筑的顶部(包含初始时的建筑)？</p><h3 id="e276c5da-a1ed-4ce7-99d5-63f48fe7d4d6" class="">输入格式</h3><p id="c1dd3842-ebf5-4e1c-9352-a26845fb3e4a" class="">输入数据第一行是一个整数K，代表有K组测试数据。</p><p id="51cbc12d-0f01-4bd8-90a7-15fc9f193f9a" class="">每组测试数据包含两行：第一行是一个整数N，代表有N幢建筑。第二行包含N个不同的整数，每一个对应一幢建筑的高度h，按照建筑的排列顺序给出。</p><h3 id="7f9c05dd-ab9c-419b-8fe2-8d3c8c992594" class="">输出格式</h3><p id="fb8e3a52-b668-4311-ab06-4f314ca0474a" class="">对于每一组测试数据，输出一行，包含一个整数，代表怪盗基德最多可以经过的建筑数量。</p><h3 id="e8ebda65-abfb-46f2-9b71-a9051fcffbc6" class="">数据范围</h3><p id="99aa0fd6-aa9a-432e-8570-1c4e786de188" class="">$1 \\le K \\le 100$,
+$1 \\le N \\le 100$,
+$0 &lt; h &lt; 10000$</p><h3 id="7ad27e56-2ce2-4712-9bee-7006191417b4" class="">输入样例：</h3><pre id="65464bb7-0de4-4654-b8db-b2ffa6c9fdbc" class="code code-wrap"><code>3
+8
+300 207 155 299 298 170 158 65
+8
+65 158 170 298 299 155 207 300
+10
+2 1 3 4 5 6 7 8 9 10
+</code></pre><h3 id="483cd08a-3bee-49be-ac58-87c48123cd6b" class="">输出样例：</h3><pre id="5d8407b5-af6d-4cdf-a1b0-7077f5b89f75" class="code code-wrap"><code>6
+6
+9
+</code></pre></details></li></ul><ul id="74053d8d-eca6-4b91-bbd0-37adcb65bd1c" class="toggle"><li><details open=""><summary>解答</summary><pre id="c789c4e2-625f-46b6-8bc6-6667ec6e5707" class="code"><code>#include&lt;iostream&gt;
+using namespace std;
+
+const int N = 110;
+
+int f[N];
+
+int a[N];
+
+int main(){
+    int T;
+    cin &gt;&gt; T;
+    while(T --){
+        int n;
+        cin &gt;&gt; n;
+        for(int i = 0; i &lt; n; i ++) cin &gt;&gt; a[i];
+        
+        int res = 0;
+        for(int i = 0; i &lt; n; i ++){
+            f[i] = 1;
+            for(int j = 0; j &lt; i; j ++)
+                if(a[i] &lt; a[j])
+                    f[i] = max(f[i], f[j] + 1);
+            res = max(res, f[i]);
+        }
+        
+        for(int i = n; i &gt;= 0; i --){
+            f[i] = 1;
+            for(int j = n - 1; j &gt; i; j --)
+                if(a[i] &lt; a[j])
+                    f[i] = max(f[i], f[j] + 1);
+            res = max(res, f[i]);
+        }
+        
+        cout &lt;&lt; res &lt;&lt; endl;
+    }
+    
+    return 0;
+}</code></pre></details></li></ul></div><h3 id="676a74fb-3fb6-4bdc-b2be-5691026dae63" class=""><details open=""><summary><a href="https://www.acwing.com/activity/content/problem/content/1260/"><strong>1014. 登山</strong></a></summary></details></h3><div class="indented"><ul id="97aec718-a7a5-43e3-aa4b-e5c204e7b50c" class="toggle"><li><details open=""><summary>题目</summary><p id="d160c78a-cf49-4cc5-8157-fd2e62065509" class="">五一到了，ACM队组织大家去登山观光，队员们发现山上一共有N个景点，并且决定按照顺序来浏览这些景点，即每次所浏览景点的编号都要大于前一个浏览景点的编号。</p><p id="9817e387-3276-4c07-af1d-044051da2350" class="">同时队员们还有另一个登山习惯，就是不连续浏览海拔相同的两个景点，并且一旦开始下山，就不再向上走了。</p><p id="b7b4be61-c377-4443-a7f2-db7cf8fcf858" class="">队员们希望在满足上面条件的同时，尽可能多的浏览景点，你能帮他们找出最多可能浏览的景点数么？</p><h3 id="c5b1d8cb-d03b-4392-9730-11408f2c1f9b" class="">输入格式</h3><p id="09cfa62f-df54-4d74-900a-e43003b56cdd" class="">第一行包含整数N，表示景点数量。</p><p id="6e061626-2f3b-43fb-9309-f10f87b86170" class="">第二行包含N个整数，表示每个景点的海拔。</p><h3 id="d9990b75-2a61-402e-8743-8229a5c47467" class="">输出格式</h3><p id="53705e48-5689-4052-803b-31adbea96b84" class="">输出一个整数，表示最多能浏览的景点数。</p><h3 id="7e4cc489-0786-4e4d-8663-eee68e7b0f8f" class="">数据范围</h3><p id="d1924729-3778-4839-a128-44a3ff45ccde" class="">$2 \\le N \\le 1000$</p><h3 id="2c0534ab-5ba9-49ce-979b-e4cfe6a4fe02" class="">输入样例：</h3><pre id="0b1b2516-b1fb-4de9-8e9d-760f855973a0" class="code code-wrap"><code>8
+186 186 150 200 160 130 197 220
+</code></pre><h3 id="f2e53c93-01b0-44e0-a9c6-5bbdb414333a" class="">输出样例：</h3><pre id="98c935e6-c2b0-45db-a1dd-91ad0a94c498" class="code code-wrap"><code>4
+</code></pre></details></li></ul><ul id="8fb740a4-93e7-43e9-8e37-056093092d85" class="toggle"><li><details open=""><summary>解答</summary><pre id="5658125d-781f-4645-8312-641e0cb1ce8d" class="code"><code>#include&lt;iostream&gt;
+
+using namespace std;
+
+const int N = 1010;
+
+int a[N], f[N], g[N]; //分别保存最长上升和下降的子序列长度
+
+int main(){
+    
+    int n;
+    cin &gt;&gt; n;
+    for(int i = 1; i &lt;= n; i ++) cin &gt;&gt; a[i];
+    
+    for(int i = 1; i &lt;= n; i ++){
+        f[i] = 1;
+        for(int j = 1; j &lt; i; j ++)
+            if(a[i] &gt; a[j])
+                f[i] = max(f[i], f[j] + 1);
+    }
+    
+    for(int i = n; i ; i --){
+        g[i] = 1;
+        for(int j = n; j &gt; i; j --)
+            if(a[i] &gt; a[j])
+                g[i] = max(g[i], g[j] + 1);
+    }
+    
+    int res = 0;
+    
+    for(int i = 1; i &lt;= n; i ++){
+        res = max(res, f[i] + g[i] - 1); //其本身被重复选择了一次
+    }
+    
+    cout &lt;&lt; res &lt;&lt; endl;
+    
+    return 0;
+}</code></pre></details></li></ul></div><h3 id="b5c93c29-8834-4652-bf31-c738e7ad4864" class=""><details open=""><summary><a href="https://www.acwing.com/problem/content/1014/"><strong><strong>1012. 友好城市</strong></strong></a></summary></details></h3><div class="indented"><ul id="c2a768ae-b05f-41ac-b718-b2fe1984c415" class="toggle"><li><details open=""><summary>题目</summary><p id="a82a704f-a6f0-4126-ac53-77dddcf67771" class=""><strong>Palmia国有一条横贯东西的大河，河有笔直的南北两岸，岸上各有位置各不相同的N个城市。</strong></p><p id="3ec88c8d-b369-416a-aafb-94ee9e5fef50" class=""><strong>北岸的每个城市有且仅有一个友好城市在南岸，而且不同城市的友好城市不相同。</strong></p><p id="4157b1ff-2a7c-4a4b-9dd0-6e040896ba55" class=""><strong>每对友好城市都向政府申请在河上开辟一条直线航道连接两个城市，但是由于河上雾太大，政府决定避免任意两条航道交叉，以避免事故。</strong></p><p id="e883781c-a47a-47f6-b30f-2fd18b40a556" class=""><strong>编程帮助政府做出一些批准和拒绝申请的决定，使得在保证任意两条航线不相交的情况下，被批准的申请尽量多。</strong></p><h3 id="546c726d-18e7-4c68-8c45-a626164078b7" class=""><strong>输入格式</strong></h3><p id="f58b6b13-bb40-4474-b159-9a0d76cbb953" class=""><strong>第1行，一个整数N，表示城市数。</strong></p><p id="20b9ee21-a7ab-4a92-9cab-146b87af4f6e" class=""><strong>第2行到第n+1行，每行两个整数，中间用1个空格隔开，分别表示南岸和北岸的一对友好城市的坐标。</strong></p><h3 id="3b3cd317-0ae6-4a0f-b648-786e2e950b36" class=""><strong>输出格式</strong></h3><p id="13695b76-f967-43e7-9e10-5e305b4a8e59" class=""><strong>仅一行，输出一个整数，表示政府所能批准的最多申请数。</strong></p><h3 id="014a0bf0-507f-4ee9-8e56-d00f41cddcec" class=""><strong>数据范围</strong></h3><p id="fa449509-8636-4633-8162-89a42b75fc9e" class=""><strong>$1 \\le N \\le 5000$,
+$0 \\le x\_i \\le 10000$</strong></p><h3 id="fcaba045-82ed-4ee0-9b87-2f39ad832b1b" class=""><strong>输入样例：</strong></h3><pre id="fd75702a-8aa1-48aa-926e-fe338f039c0d" class="code code-wrap"><code>7
+22 4
+2 6
+10 3
+15 12
+9 8
+17 17
+4 2
+</code></pre><h3 id="3c4ddc15-de9b-4b01-a7af-0b2a5e9e7af9" class=""><strong>输出样例：</strong></h3><pre id="8f2d3e77-a52a-4bde-8362-182f308a63a2" class="code code-wrap"><code>4
+</code></pre></details></li></ul><ul id="a5de4eb7-5560-4ee6-bf63-6a4d7855e9e1" class="toggle"><li><details open=""><summary>解答</summary><pre id="41f7f233-9a17-46b5-aae4-4858bf4cbaf7" class="code"><code>#include&lt;iostream&gt;
+#include&lt;algorithm&gt;
+using namespace std;
+
+const int N = 100010;
+
+typedef pair&lt;int, int&gt; PII;
+
+PII a[N];
+
+int f[N];
+
+int main(){
+    
+    int n;
+    cin &gt;&gt; n;
+    for(int i = 0; i &lt; n; i ++) cin &gt;&gt; a[i].first &gt;&gt; a[i].second;
+    
+    sort(a, a + n);
+    
+    int res = 0;
+    
+    for(int i = 0; i &lt; n; i ++){
+        f[i] = 1;
+        for(int j = 0; j &lt; i; j ++)
+            if(a[i].second &gt; a[j].second)
+                f[i] = max(f[i], f[j] + 1);
+                
+        res = max(res, f[i]);
+    }
+    
+    cout &lt;&lt; res &lt;&lt; endl;
+    
+}</code></pre></details></li></ul></div><h3 id="ffd6da78-e910-419b-9b80-17fff3c1c5ba" class=""><details open=""><summary><a href="https://www.acwing.com/problem/content/1018/"><strong><strong>1016. 最大上升子序列和</strong></strong></a></summary></details></h3><div class="indented"><ul id="140bbddc-0369-433f-b895-b3aa678fce23" class="toggle"><li><details open=""><summary>题目</summary><p id="13aa3658-dd17-41c7-94b2-224338454c3c" class="">一个数的序列 $b\_i$，当 $b\_1&lt;b\_2&lt;…&lt;b\_S$ 的时候，我们称这个序列是上升的。</p><p id="72667ac4-0b7a-4bb9-a58f-4fe79a44719f" class="">对于给定的一个序列($a\_1,a\_2,…,a\<em>N$)，我们可以得到一些上升的子序列($a\</em>{i\<em>1},a\</em>{i\<em>2},…,a\</em>{i\_K}$)，这里$1≤i\_1&lt;i\_2&lt;…&lt;i\_K≤N$。</p><p id="0109a066-8bc5-47fb-8e91-34ea69e6e0d8" class="">比如，对于序列(1,7,3,5,9,4,8)，有它的一些上升子序列，如(1,7),(3,4,8)等等。</p><p id="3a811f75-8a4b-4661-b5eb-f2f86c836ebc" class="">这些子序列中和最大为18，为子序列(1,3,5,9)的和。</p><p id="a49b0071-7b37-4e49-8cc5-30ad63ae2eb2" class="">你的任务，就是对于给定的序列，求出最大上升子序列和。</p><p id="edc6aa09-c85a-42a5-9a68-718b5e566351" class="">注意，最长的上升子序列的和不一定是最大的，比如序列(100,1,2,3)的最大上升子序列和为100，而最长上升子序列为(1,2,3)。</p><h3 id="78f32d87-0c37-45cf-89f1-37e6a28b36b2" class="">输入格式</h3><p id="a49b7b6e-69a6-4f16-a9fc-8348ac134e69" class="">输入的第一行是序列的长度N。</p><p id="6f89ba06-234c-4ba2-91a0-d5bfe2fc4ab0" class="">第二行给出序列中的N个整数，这些整数的取值范围都在0到10000(可能重复)。</p><h3 id="ca19d2f4-dfcb-470a-85a0-8df6072b7c1b" class="">输出格式</h3><p id="1fbf4357-603d-445f-9ff2-b943efc0b35d" class="">输出一个整数，表示最大上升子序列和。</p><h3 id="fd53a2f7-80bd-41af-b61e-418801023c15" class="">数据范围</h3><p id="4865dc12-463d-4e26-87cc-467ce2d226af" class="">$1 \\le N \\le 1000$</p><h3 id="c9b5aa45-b1d8-4ffe-9dc1-11cb3ffc75d8" class="">输入样例：</h3><pre id="136979dc-17d9-4077-9e0d-9f3cbab01512" class="code code-wrap"><code>7
+1 7 3 5 9 4 8
+</code></pre><h3 id="8d49d85a-ad20-4cff-8360-91a76fc639c2" class="">输出样例：</h3><pre id="e0a08142-7ddf-4c9a-b2b2-8f2aa8baf963" class="code code-wrap"><code>18
+</code></pre></details></li></ul><ul id="77109365-95cc-475b-b657-aca92b2ef364" class="toggle"><li><details open=""><summary>解答</summary><pre id="f70cef08-f6c1-4c8d-945f-5519fadbba13" class="code"><code>#include&lt;iostream&gt;
+using namespace std;
+const int N = 1010;
+int f[N], a[N];
+int main(){
+    int n;
+    cin &gt;&gt; n;
+    for(int i = 0; i &lt; n; i ++) cin &gt;&gt; a[i];
+    
+    int res = 0;
+    for(int i = 0; i &lt; n; i ++){
+        f[i] = a[i];
+        for(int j = 0; j &lt; i; j ++)
+            if(a[i] &gt; a[j])
+                f[i] = max(f[i], f[j] + a[i]);
+                
+        res = max(res, f[i]);
+    }
+    cout &lt;&lt; res &lt;&lt; endl;
+		return 0;
+}</code></pre></details></li></ul></div><hr id="9a635b29-ba90-4836-b02f-767a372a8875"/><h3 id="25af9844-475d-4dba-87ae-b55151521386" class=""><details open=""><summary><a href="https://www.acwing.com/activity/content/problem/content/1264/"><strong><strong>1010. 拦截导弹</strong></strong></a></summary></details></h3><div class="indented"><ul id="2af600f3-f6fd-43b5-b237-261fca996af2" class="toggle"><li><details open=""><summary>题目</summary><p id="dc871870-9acd-47e0-a697-49d75c095b4e" class="">某国为了防御敌国的导弹袭击，发展出一种导弹拦截系统。</p><p id="fb1c6f9a-1bb9-4333-bc74-d670b3bb55e6" class="">但是这种导弹拦截系统有一个缺陷：虽然它的第一发炮弹能够到达任意的高度，但是以后每一发炮弹都不能高于前一发的高度。</p><p id="905da497-48d4-4c2c-9a72-54004c0d5a88" class="">某天，雷达捕捉到敌国的导弹来袭。</p><p id="102db2b2-8616-4c7d-bc12-a4e743627e80" class="">由于该系统还在试用阶段，所以只有一套系统，因此有可能不能拦截所有的导弹。</p><p id="027be7ac-6804-4a4f-af66-4258579c227c" class="">输入导弹依次飞来的高度（雷达给出的高度数据是不大于30000的正整数，导弹数不超过1000），计算这套系统最多能拦截多少导弹，如果要拦截所有导弹最少要配备多少套这种导弹拦截系统。</p><h3 id="1db656dc-a7e2-43fa-a47d-40e84f669be5" class="">输入格式</h3><p id="7b27057a-4ecf-42f1-b45c-56f3bfbca436" class="">共一行，输入导弹依次飞来的高度。</p><h3 id="4c326591-1845-4516-acff-bc78803a8a3f" class="">输出格式</h3><p id="3ce1db6b-fe66-48e0-9fe7-fa5cad05aeab" class="">第一行包含一个整数，表示最多能拦截的导弹数。</p><p id="82507b21-a783-47cd-a030-1e5b8600f029" class="">第二行包含一个整数，表示要拦截所有导弹最少要配备的系统数。</p><h3 id="4dacd151-e8c1-40ff-877a-018eee3dae20" class="">数据范围</h3><p id="3cacde8e-5b8d-4496-b635-69d90a7751d6" class="">雷达给出的高度数据是不大于 $30000$ 的正整数，导弹数不超过 $1000$。</p><h3 id="288d456d-3c91-4689-8a79-30c5a7d0f54c" class="">输入样例：</h3><pre id="3a073cab-7864-4f94-a922-48b7e8ee3ce0" class="code code-wrap"><code>389 207 155 300 299 170 158 65
+</code></pre><h3 id="4126c721-1ee2-4ecf-a6f9-e816c600783e" class="">输出样例：</h3><pre id="53cc70d0-f84a-4672-9747-b093dc2e7260" class="code code-wrap"><code>6
+2
+</code></pre></details></li></ul><ul id="286b70c5-5924-447b-a76b-0214962662e6" class="toggle"><li><details open=""><summary>解答</summary><p id="395f4fe2-1d09-4b70-90f2-919d985b1531" class="">贪心的流程：<div class="indented"><p id="f2052612-e499-4448-a5ef-a663f9853c0b" class="">从前往后扫描每个数，对于每个数</p><p id="6369f269-00b7-4c86-8386-5c84e3298abd" class="">情况1：如果现有的子序列的结尾都小于当前数。则创建新子数列；</p><p id="ec669ada-3151-4dc5-b747-45eb2c9aea2b" class="">情况2：将当前的数放到结尾大于等于它的最小的子序列后面；</p></div></p><p id="99224c4c-3cd2-43ba-9059-0e3c2d2169b3" class="">如何证明两个数相等？A≥B, A≤B<div class="indented"><p id="477b270c-a8fd-4b5f-b577-4010503ad237" class="">A表示贪心算法得到的序列的个数，B表示最优解</p><p id="3bf3ed33-ec66-40c0-8689-f47699f3e7d9" class="">B≤A</p><p id="7e264650-2149-4f2f-8891-39a1d77cf90b" class="">A≤B，调整法</p><p id="21bc9d30-3d1f-4143-b15d-638881c52cab" class="">假设最优解对应的方案和当前的方案不同。</p><p id="6a03ff4a-29ed-4239-b1da-b9cb8c1602c6" class="">找到第一个不同的数</p></div></p></details></li></ul></div><p id="7422c8e4-0ed1-4a46-aca0-15a1302a7989" class="">
+</p></div></article></body></html>

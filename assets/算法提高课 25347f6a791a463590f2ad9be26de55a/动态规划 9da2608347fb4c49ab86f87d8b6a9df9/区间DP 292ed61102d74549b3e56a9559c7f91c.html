@@ -1,0 +1,977 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>区间DP</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="292ed611-02d7-4549-b3e5-6a9559c7f91c" class="page sans"><header><div class="page-header-icon undefined"><span class="icon">📏</span></div><h1 class="page-title">区间DP</h1></header><div class="page-body"><h2 id="b46576f4-d2e2-43a5-bce9-132dcaa9f67b" class="">基础： </h2><h3 id="d1ed6817-5ee9-4390-82e0-88e62e8a03af" class=""><details open=""><summary><strong>282. </strong>石子合并</summary></details></h3><div class="indented"><ul id="a034b9e6-e5df-4c46-8e7a-e93593c8b9dd" class="toggle"><li><details open=""><summary>题目</summary><p id="c609c05c-0cbc-4bbf-b179-3eb22ea50b00" class="">设有 N 堆石子排成一排，其编号为 1，2，3，…，N。</p><p id="3ef93218-24ed-4a86-b570-e47c69f92aad" class="">每堆石子有一定的质量，可以用一个整数来描述，现在要将这 N 堆石子合并成为一堆。</p><p id="32d26ef5-31de-4a18-9c47-2ff7ddfa03fb" class="">每次只能合并相邻的两堆，合并的代价为这两堆石子的质量之和，合并后与这两堆石子相邻的石子将和新堆相邻，合并时由于选择的顺序不同，合并的总代价也不相同。</p><p id="4e11db23-ed9d-4e9d-9660-615172841883" class="">找出一种合理的方法，使总的代价最小，输出最小代价。</p></details></li></ul><ul id="2fccd628-d9a5-44df-825d-78e59674eb04" class="toggle"><li><details open=""><summary>解答</summary><p id="8c315ecb-4e45-4b85-870b-6e5954f14edf" class="">先循环区间长度 在循环左端点</p><pre id="6ac1b1b8-1fd6-4c7c-b12a-5e6a484be5ed" class="code"><code>#include&lt;iostream&gt;
+#include&lt;cstring&gt;
+using namespace std;
+const int N = 310;
+int f[N][N];
+int w[N], s[N];
+int main(){
+    int n;
+    cin &gt;&gt; n;
+    for(int i = 1; i &lt;= n; i ++){
+        cin &gt;&gt; w[i];
+        s[i] = s[i - 1] + w[i];
+    }
+    memset(f, 0x3f, sizeof f);
+    for(int len = 1; len &lt;= n; len ++)
+        for(int l = 1; l + len - 1 &lt;= n; l ++){
+            int r = l + len - 1;
+            if(len == 1){
+                f[l][r] = 0;
+                continue;
+            }
+            for(int k = l; k &lt; r; k ++)
+                f[l][r] = min(f[l][r], f[l][k] + f[k + 1][r] + s[r] - s[l - 1]);
+        }
+    cout &lt;&lt; f[1][n] &lt;&lt; endl;
+    return 0;
+}</code></pre></details></li></ul></div><h2 id="d27f029d-5b2c-42ec-a1d7-1de13455c4b2" class="">常用技巧：</h2><h3 id="da551a88-1718-4656-bef3-f960e25ec20d" class=""><details open=""><summary>1. 将环形的区间变为一条链</summary></details></h3><div class="indented"><p id="e0f1a4f3-724c-4e97-80e0-772b1a2c9d1c" class="">将两段长为n的区间连在一起，按照朴素的方法进行预处理，然后枚举出长度为n的最小值</p><h3 id="91175955-625e-42d8-b0e0-4e24fc4c9546" class=""><details open=""><summary><strong>1068. 环形石子合并</strong></summary></details></h3><div class="indented"><ul id="91dcfc59-883c-42d8-8be8-e9ececed2982" class="toggle"><li><details open=""><summary>题目</summary><p id="a09deeb3-a276-41b3-a41c-6e6219df5585" class="">将 $n$ 堆石子绕圆形操场排放，现要将石子有序地合并成一堆。</p><p id="61ee71ab-48f8-4185-ba81-674337c901ad" class="">规定每次只能选相邻的两堆合并成新的一堆，并将新的一堆的石子数记做该次合并的得分。</p><p id="e0caf7e6-8afc-446d-a1c0-562b9607cde7" class="">请编写一个程序，读入堆数 $n$ 及每堆的石子数，并进行如下计算：</p><ul id="b80ff377-fb96-4ed0-9905-bab01f25eb2e" class="bulleted-list"><li style="list-style-type:disc">选择一种合并石子的方案，使得做 $n-1$ 次合并得分总和最大。</li></ul><ul id="23fea3b5-3fe0-4d54-9c59-c51005ff5dcb" class="bulleted-list"><li style="list-style-type:disc">选择一种合并石子的方案，使得做 $n-1$ 次合并得分总和最小。</li></ul><h3 id="5008c8d6-c594-4e85-a6a5-c6ceafeb2ea9" class="">输入格式</h3><p id="4d71c838-28f0-472a-a475-8ff1002323cd" class="">第一行包含整数 $n$，表示共有 $n$ 堆石子。</p><p id="460d848b-4fd0-407f-8840-d086c333878b" class="">第二行包含 $n$ 个整数，分别表示每堆石子的数量。</p><h3 id="3f0e4106-5608-42a5-9135-70aaeef351e7" class="">输出格式</h3><p id="4ae0a1ea-1958-41f7-a272-bcf59736f62d" class="">输出共两行：</p><p id="a55f10a6-b44a-43d2-b73c-2e6b7b743d2a" class="">第一行为合并得分总和最小值，</p><p id="3776c37f-9f2e-4c14-b5ec-fd570fb94da2" class="">第二行为合并得分总和最大值。</p><h3 id="226d6b44-ef6c-4299-9ccc-c731539b50de" class="">数据范围</h3><p id="76338284-fd02-4ea9-b8a3-9825f5a11297" class="">$1 \\le n \\le 200$</p><h3 id="c1bcc157-4dfe-4cd2-8db7-7f81d5582fac" class="">输入样例：</h3><pre id="b5af5bb1-db92-4e12-869b-cf41fcd438e6" class="code code-wrap"><code>4
+4 5 9 4</code></pre><h3 id="587429fe-23ce-4307-a72a-57e3afbb4d7d" class="">输出样例：</h3><pre id="7c3c7c8f-1828-4c1f-8bb2-c4f17c63c0dc" class="code code-wrap"><code>43
+54</code></pre></details></li></ul><ul id="f1b18bb3-c399-49d0-8cca-1584f72a11e8" class="toggle"><li><details open=""><summary>解答</summary><pre id="a6380914-d12a-4ae1-aa2d-9ad1422dd20d" class="code"><code>#include&lt;iostream&gt;
+#include&lt;algorithm&gt;
+#include&lt;cstring&gt;
+using namespace std;
+const int N = 410, INF = 0x3f3f3f3f;
+int w[N], s[N];
+int f[N][N], g[N][N];
+int n;
+
+int main(){
+    cin &gt;&gt; n;
+    for(int i = 1; i &lt;= n; i ++){
+        cin &gt;&gt; w[i];
+        w[i + n] = w[i];
+    }
+    for(int i = 1; i &lt;= n * 2; i ++)
+        s[i] = s[i - 1] + w[i];
+    memset(f, INF, sizeof f);
+    memset(g, - INF, sizeof g);
+    for(int len = 1; len &lt;= n; len ++)
+        for(int l = 1; l + len - 1 &lt;= n * 2; l ++){
+            int r = l + len - 1;
+            if(len == 1) f[l][r] = g[l][r] = 0;
+            else
+                for(int k = l; k &lt; r; k ++){ // k + 1 &lt;= r
+                    f[l][r] = min(f[l][r], f[l][k] + f[k + 1][r] + s[r] - s[l - 1]);
+                    g[l][r] = max(g[l][r], g[l][k] + g[k + 1][r] + s[r] - s[l - 1]);
+                }
+        }
+        
+    int maxv = -INF, minv = INF;
+    for(int i = 1; i &lt;= n; i ++){
+        minv = min(minv, f[i][i + n - 1]);
+        maxv = max(maxv, g[i][i + n - 1]);
+    }
+    cout &lt;&lt; minv &lt;&lt; endl &lt;&lt; maxv &lt;&lt; endl;
+    return 0;
+}</code></pre></details></li></ul></div><h3 id="ded90f4e-e64a-45ae-b67d-ed685d3b9d4c" class=""><details open=""><summary><strong>320. 能量项链</strong></summary></details></h3><div class="indented"><ul id="8d1cf87f-979b-4e8e-94ba-ab3944ffc7f2" class="toggle"><li><details open=""><summary>题目</summary><p id="86c2f941-9e99-4057-8743-fcc77a437ced" class="">在 Mars 星球上，每个 Mars 人都随身佩带着一串能量项链，在项链上有 $N$ 颗能量珠。</p><p id="0f0b3858-5e25-4621-961c-27f67426d336" class="">能量珠是一颗有头标记与尾标记的珠子，这些标记对应着某个正整数。</p><p id="6b7e82e2-bcf3-400e-8b1f-b1a5089cae79" class="">并且，对于相邻的两颗珠子，前一颗珠子的尾标记一定等于后一颗珠子的头标记。</p><p id="c1a43130-c8d7-48bb-ac81-41b18463cf09" class="">因为只有这样，通过吸盘（吸盘是 Mars 人吸收能量的一种器官）的作用，这两颗珠子才能聚合成一颗珠子，同时释放出可以被吸盘吸收的能量。</p><p id="bf196bb6-0064-4dc8-be93-7adc41fc195f" class="">如果前一颗能量珠的头标记为 $m$，尾标记为 $r$，后一颗能量珠的头标记为 $r$，尾标记为 $n$，则聚合后释放的能量为 $m \\times r \\times n$（Mars 单位），新产生的珠子的头标记为 $m$，尾标记为 $n$。</p><p id="4515f9c5-8368-40c0-a312-74a1a3b0b725" class="">需要时，Mars 人就用吸盘夹住相邻的两颗珠子，通过聚合得到能量，直到项链上只剩下一颗珠子为止。</p><p id="200266a1-7d12-4ac6-88a0-2ecf50b01232" class="">显然，不同的聚合顺序得到的总能量是不同的，请你设计一个聚合顺序，使一串项链释放出的总能量最大。</p><p id="b6923a60-7aa7-4ba1-bf85-c2cffcce2efb" class="">例如：设 $N=4$，$4$ 颗珠子的头标记与尾标记依次为 $(2，3) (3，5) (5，10) (10，2)$。</p><p id="52cf4c89-f3e7-4b0d-8a2a-bce1e6327d14" class="">我们用记号 $⊕$ 表示两颗珠子的聚合操作，$(j⊕k)$ 表示第 $j$，$k$ 两颗珠子聚合后所释放的能量。则</p><p id="0024ca88-e649-44ca-9131-4971430bfee9" class="">第 $4、1$ 两颗珠子聚合后释放的能量为：$(4⊕1)=10 \\times 2 \\times 3=60$。</p><p id="acd1499f-03ab-41b9-bdec-6592955b1b5e" class="">这一串项链可以得到最优值的一个聚合顺序所释放的总能量为 $((4 \\oplus 1) \\oplus 2) \\oplus 3) = 10 \\times 2 \\times 3+10 \\times 3 \\times 5+10 \\times 5 \\times 10=710$。</p><h3 id="cbd467c3-f8e8-4186-a934-3100f5defd28" class="">输入格式</h3><p id="bf3d83cf-3dc3-4952-a625-9ba99279377c" class="">输入的第一行是一个正整数 $N$，表示项链上珠子的个数。</p><p id="7a6a0e2c-345f-47d3-9ac8-ef5c1e069a59" class="">第二行是 $N$ 个用空格隔开的正整数，所有的数均不超过 $1000$，第 $i$ 个数为第 $i$ 颗珠子的头标记，当 $i&lt;N$ 时，第 $i$ 颗珠子的尾标记应该等于第 $i+1$ 颗珠子的头标记，第 $N$ 颗珠子的尾标记应该等于第 $1$ 颗珠子的头标记。</p><p id="f5e2b59f-5c70-4ec9-8a9f-171041c97250" class="">至于珠子的顺序，你可以这样确定：将项链放到桌面上，不要出现交叉，随意指定第一颗珠子，然后按顺时针方向确定其他珠子的顺序。</p><h3 id="382e1fb6-eeb7-469d-b737-e2c219077629" class="">输出格式</h3><p id="617ac055-6f6f-42e3-b3b5-9abfd803dab7" class="">输出只有一行，是一个正整数 $E$，为一个最优聚合顺序所释放的总能量。</p><h3 id="d9eaa51a-1199-4cad-9229-90e57f09e041" class="">数据范围</h3><p id="ff9759cc-572d-433f-9b2c-434a4eeae6af" class="">$4 \\le N \\le 100$,
+$1 \\le E \\le 2.1 \\times 10^9$</p><h3 id="2ac2ff50-f3f5-437c-a77e-cd9ac0796cf0" class="">输入样例：</h3><pre id="80c05929-14ca-4449-aae1-6fda5abbcc82" class="code code-wrap"><code>4
+2 3 5 10</code></pre><h3 id="5e07d1b9-4cdc-4335-b248-95cad4c22bdf" class="">输出样例：</h3><pre id="ba594f62-3153-447e-b8af-a2bcc0223f79" class="code code-wrap"><code>710</code></pre></details></li></ul><ul id="459a5d85-6764-423b-a04d-80d4697ff653" class="toggle"><li><details open=""><summary>解答</summary><p id="2d184c3e-2cdf-4518-8930-25a118df185e" class="">状态表示：f[L, R] 是所有将L, R合并在一个矩阵的所有的方式。属性：Max</p><p id="9db1f37c-4296-40d6-a7e4-20decc2d301b" class="">状态计算：通过最后一个不同点将集合划分</p><p id="a2d5b4f5-ee14-4a8e-8b93-ddb795b54444" class="">第k类的最大的值是f[l, k] + f[k, r] + w[l] * w[k] * w[r];</p><p id="a2734a64-4bcb-4ae0-8dd9-5bc40bc48147" class="">求每一类的最大值</p><pre id="8932f809-96c8-4974-8ae3-cd57bf88566b" class="code"><code>#include&lt;iostream&gt;
+#include&lt;cstring&gt;
+using namespace std;
+const int N = 110, M = N &lt;&lt; 1;
+int f[M][M], w[M], n;
+int main(){
+    cin &gt;&gt; n;
+    for(int i = 1; i &lt;= n; i ++){
+        cin &gt;&gt; w[i];
+        w[i + n] = w[i];
+    }
+    //memset(f, 0xcf, sizeof f); // 由于不存在负数的状态所以可以不初始化
+    for(int len = 3; len &lt;= n + 1; len ++)
+        for(int l = 1; l + len - 1 &lt;= n &lt;&lt; 1; l ++){
+            int r = l + len - 1;
+            for(int k = l + 1; k &lt; r; k ++)
+                f[l][r] = max(f[l][r], f[l][k] + f[k][r] + w[l] * w[k] * w[r]);
+        }
+    int res = 0;
+    for(int i = 1; i &lt;= n; i ++)
+        res = max(res, f[i][i + n]);
+    cout &lt;&lt; res &lt;&lt; endl;
+    return 0;
+}</code></pre></details></li></ul><ul id="bbb33705-a90f-4c35-8610-0c213ceca83d" class="toggle"><li><details open=""><summary>其他写法</summary><pre id="bd4253e3-2bae-489f-beb2-966bf955848b" class="code"><code>#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+using namespace std;
+const int N = 110, M = N &lt;&lt; 1;
+int n, w[M], f[M][M];
+
+int main(){
+    scanf(&quot;%d&quot;, &amp;n);
+    for (int i = 1; i &lt;= n; ++ i) scanf(&quot;%d&quot;, &amp;w[i]), w[n + i] = w[i];
+    memset(f, -0x3f, sizeof f); //本题可以不用初始化，因为不存在负数的状态值，因此0就是最小的
+    for (int len = 2; len &lt;= n + 1; ++ len)
+        for (int l = 1, r; (r = l + len - 1) &lt;= n &lt;&lt; 1; ++ l)
+            if (len == 2) f[l][r] = 0; //初始化初始状态
+            else
+                for (int k = l + 1; k &lt; r; ++ k)
+                    f[l][r] = max(f[l][r], f[l][k] + f[k][r] + w[l] * w[k] * w[r]);
+    int res = 0;
+    for (int l = 1; l &lt;= n; ++ l) res = max(res, f[l][l + n]);
+    printf(&quot;%d\n&quot;, res);
+    return 0;
+}</code></pre></details></li></ul><ul id="c7b1de24-4a88-4b72-8d39-61f7cf863f18" class="toggle"><li><details open=""><summary>其他解法</summary><pre id="9a8bb221-1a92-43b0-a081-97c0110575a4" class="code"><code>#include&lt;iostream&gt;
+#include&lt;algorithm&gt;
+using namespace std;
+const int N=210,INF=0x3f3f3f3f;
+int n;
+int a[N];
+int g[N][N];
+
+int main(){
+    cin&gt;&gt;n;
+    for(int i=1;i&lt;=n;i++){
+        cin&gt;&gt;a[i];
+        a[i+n]=a[i];
+    }
+
+    for(int len=1;len&lt;=n;len++)
+        for(int i=1;i+len-1&lt;=n*2;i++){
+            int l=i,r=i+len-1;
+            if(len==1)  g[l][r]=0;
+            for(int k=l;k&lt;r;k++)    g[l][r]=max(g[l][r],g[l][k]+g[k+1][r]+a[l]*a[k+1]*a[r+1]);
+            //这里的过程同石子合并，这里不难想到若将l到k的珠子合并之后会变成一个首是l而尾k+1的珠子；
+            //同理若将k+1到r的珠子合并之后会变成一个首是k+1而尾r+1的珠子；
+        }
+    int maxv=-INF;
+    for(int i=1;i&lt;=n;i++)
+        maxv=max(g[i][i+n-1],maxv);//区间长度为n
+    cout&lt;&lt; maxv &lt;&lt;endl;
+    return 0;
+}</code></pre></details></li></ul></div></div><h3 id="891ff1f5-95d5-4ebf-adf3-d9c9ce0387d9" class=""><details open=""><summary>2. 区间DP记录方案数</summary></details></h3><div class="indented"><h3 id="87a8ac83-2c4c-4a11-80a0-656d47f886f0" class=""><details open=""><summary><strong>479. 加分二叉树</strong></summary></details></h3><div class="indented"><ul id="da9d9b66-07ad-4d5f-92ef-dc26994c4be8" class="toggle"><li><details open=""><summary>题目</summary><p id="a2684443-9e40-49c4-ad28-513e4ac4d6c4" class="">设一个 $n$ 个节点的二叉树 tree 的中序遍历为（$1,2,3,…,n$），其中数字 $1,2,3,…,n$ 为节点编号。</p><p id="72c93720-16d5-4df7-ad2c-680ff15e24fd" class="">每个节点都有一个分数（均为正整数），记第 $i$ 个节点的分数为 $d\_i$，tree 及它的每个子树都有一个加分，任一棵子树 subtree（也包含 tree 本身）的加分计算方法如下：</p><p id="01544ff4-9d91-4fa6-bd69-cc3daa0121d3" class="">subtree的左子树的加分 $×$ subtree的右子树的加分 $＋$ subtree的根的分数</p><p id="4157d2d0-a8cb-4201-a46c-1a1c3dcea756" class="">若某个子树为空，规定其加分为 $1$。</p><p id="899135bc-226a-400a-bcfb-7c0cc3e42cb2" class="">叶子的加分就是叶节点本身的分数，不考虑它的空子树。</p><p id="f649be91-87b4-45e9-8e36-48de8fa93ed8" class="">试求一棵符合中序遍历为（$1,2,3,…,n$）且加分最高的二叉树 tree。</p><p id="e45650ba-b247-46ed-b0a1-e3789f492b2f" class="">要求输出：</p><p id="5a833b53-537b-461b-9895-35510af5b8f9" class="">（1）tree的最高加分</p><p id="bd1e70cc-9810-4a1c-97d8-04ecd80a2094" class="">（2）tree的前序遍历</p><h3 id="f46a9e38-bc2f-4b90-9c4b-a03750dc13c4" class="">输入格式</h3><p id="6229f7b8-e723-4e7d-a599-36d02e3d51e5" class="">第 $1$ 行：一个整数 $n$，为节点个数。</p><p id="b16a6b13-dbc8-44f8-a53c-c785a7376fa6" class="">第 $2$ 行：$n$ 个用空格隔开的整数，为每个节点的分数（$0&lt;$分数$&lt;100$）。</p><h3 id="38f17914-6f58-403f-b0a0-7707d9c3e576" class="">输出格式</h3><p id="c0d2e9ed-a062-4105-a961-eda50a998249" class="">第 $1$ 行：一个整数，为最高加分（结果不会超过<code>int</code>范围）。</p><p id="bf4bd18e-f50d-4d26-b023-9419bfa425bb" class="">第 $2$ 行：$n$ 个用空格隔开的整数，为该树的前序遍历。如果存在多种方案，则输出字典序最小的方案。</p><h3 id="2e86dbd1-707d-48f6-a507-d232376e1f55" class="">数据范围</h3><p id="aa196e22-5d57-42e3-a2f6-b3a3c6118e77" class="">$n &lt; 30$</p><h3 id="ebea5891-18bb-4b72-a631-a3c8735f0f2a" class="">输入样例：</h3><pre id="f7f35915-9d85-4852-b37f-1491fb2cda1d" class="code code-wrap"><code>5
+5 7 1 2 10</code></pre><h3 id="8c7ca183-22e5-4b3d-8add-50b178b3423e" class="">输出样例：</h3><pre id="fa9215d1-43be-4665-b354-cd447c90204a" class="code code-wrap"><code>145
+3 1 2 4 5</code></pre></details></li></ul><ul id="0a1d8a4d-003d-4c12-942b-b0879ff1ad4e" class="toggle"><li><details open=""><summary>解答</summary><ul id="34755f9c-c48d-4dfe-8185-4f49e757079f" class="toggle"><li><details open=""><summary>区间DP</summary><pre id="682a319d-8bc3-4086-aea7-34de1388514f" class="code"><code>#include&lt;iostream&gt;
+#include&lt;cstring&gt;
+using namespace std;
+const int N = 35;
+int f[N][N]; // 表示区间的最高的加分
+int g[N][N]; // 保存l, r区间的根节点的序号
+int w[N], n;
+
+void dfs(int l, int r){ // 递归打印树的前序遍历
+    if(l &gt; r) return ;
+    int k = g[l][r];
+    cout &lt;&lt; k &lt;&lt; &quot; &quot;;
+    dfs(l, k - 1);
+    dfs(k + 1, r);
+}
+
+int main(){
+    cin &gt;&gt; n;
+    for(int i = 1; i &lt;= n; i ++) cin &gt;&gt; w[i];
+    // 保存中序遍历为1,2,3...n的根节点的值
+    for(int len = 1; len &lt;= n; len ++)
+        for(int l = 1; l + len - 1 &lt;= n; l ++){
+            int r = l + len - 1;
+            if(len == 1){ // 初始化，此时r=l
+                f[l][r] = w[l];
+                g[l][r] = l;
+                continue;
+            }
+            for(int k = l; k &lt;= r; k ++){
+								// 如果没有左(右)节点, 将其加分设置为1
+                int left = k == l ? 1 : f[l][k - 1];
+                int right = k == r ? 1 : f[k + 1][r];
+                int score = left * right + w[k];
+                if(f[l][r] &lt; score){
+										// 求字典序最小的一个答案
+										//可知其根节点越靠前 字典序越小
+                    f[l][r] = score;
+                    g[l][r] = k;
+                }
+            }
+        }
+    cout &lt;&lt; f[1][n] &lt;&lt; endl;
+    dfs(1, n);
+    return 0;
+}</code></pre></details></li></ul><ul id="a21ecc07-154b-4489-a7eb-70d791370689" class="toggle"><li><details open=""><summary>记忆化搜索</summary></details></li></ul></details></li></ul></div></div><h3 id="7a0f4615-3dcd-457b-b2d6-b55a8e15f802" class=""><details open=""><summary>3. 区间DP+高精度</summary></details></h3><div class="indented"><h3 id="f96dc825-5d81-4cad-8fa0-8a718e077d58" class=""><details open=""><summary><strong>1069. 凸多边形的划分</strong></summary></details></h3><div class="indented"><ul id="f0423b48-6546-4f9c-869e-b64aede28eb4" class="toggle"><li><details open=""><summary>题目</summary><p id="fb672611-c780-4003-a4a2-473c29879578" class="">给定一个具有 $N$ 个顶点的凸多边形，将顶点从 $1$ 至 $N$ 标号，每个顶点的权值都是一个正整数。</p><p id="661974bf-67a4-4a83-9842-877a24bf8cd0" class="">将这个凸多边形划分成 $N-2$ 个互不相交的三角形，对于每个三角形，其三个顶点的权值相乘都可得到一个权值乘积，试求所有三角形的顶点权值乘积之和至少为多少。</p><h3 id="9ae09b10-9c77-4a43-8ad1-01aab91be454" class="">输入格式</h3><p id="53a2ca6a-a867-4dc8-955a-1c7a90184c0e" class="">第一行包含整数 $N$，表示顶点数量。</p><p id="35b339de-b2e3-4844-a183-95dd221a5afd" class="">第二行包含 $N$ 个整数，依次为顶点 $1$ 至顶点 $N$ 的权值。</p><h3 id="11f8277e-28ec-42fc-b17d-5ea1d523a497" class="">输出格式</h3><p id="542e3cb1-181c-4f08-ba95-33820635ed49" class="">输出仅一行，为所有三角形的顶点权值乘积之和的最小值。</p><h3 id="b631dca3-465c-467a-b6aa-a5b92920e36e" class="">数据范围</h3><p id="2d3eac7f-1d85-4ce9-827a-ab19801032bb" class="">$N \\le 50$,
+数据保证所有顶点的权值都小于$10^9$</p><h3 id="ca2eddcf-3852-4814-adc6-9e898e6b2564" class="">输入样例：</h3><pre id="35482a42-a831-4530-911d-943b042fd4ea" class="code code-wrap"><code>5
+121 122 123 245 231</code></pre><h3 id="471a4658-1012-475a-a361-bc7111d9c562" class="">输出样例：</h3><pre id="3e2b6cc2-732e-4c36-9822-08a9c128d31d" class="code code-wrap"><code>12214884</code></pre></details></li></ul><ul id="50e2a030-80a2-464d-8be9-db9c5748ca75" class="toggle"><li><details open=""><summary>解答</summary><ul id="3e89d6ed-2a63-4d4e-a0a3-c9bfeda6fa4a" class="toggle"><li><details open=""><summary>不带有高精度的写法</summary><pre id="c0b2f62b-cabc-48b9-86b4-b6c6969dfde7" class="code"><code>#include&lt;iostream&gt;
+#include&lt;cstring&gt;
+using namespace std;
+const int N = 55, M = 35, INF = 1e9;
+int n;
+int w[N];
+int f[N][N]; // 当前划分到的多边形的左端点是 l，右端点是 r 的方案
+
+int main (){
+    cin &gt;&gt; n;
+    for(int i = 1; i &lt;= n; i ++) cin &gt;&gt; w[i];
+    memset(f, 0x3f, sizeof f);
+    for(int len = 2; len &lt;= n; len ++)
+        for(int l = 1; l + len - 1 &lt;= n; l ++){
+            int r = l + len - 1;
+            if(len == 2) f[l][r] = 0; // 这是一条边的情况 初始化f[l][l+1]为0
+            for(int k = l + 1; k &lt; r; k ++)
+                f[l][r] = min(f[l][r], f[l][k] + f[k][r] + w[l] * w[k] * w[r]);      
+        }
+    cout &lt;&lt; f[1][n] &lt;&lt; endl;
+    return 0;
+}</code></pre><pre id="9adb70bd-ba4f-46c1-a4e2-116ca7689e2e" class="code"><code>#include&lt;iostream&gt;
+#include&lt;cstring&gt;
+using namespace std;
+const int N = 55, M = 35, INF = 1e9;
+int n;
+int w[N];
+int f[N][N];
+
+int main (){
+    cin &gt;&gt; n;
+    for(int i = 1; i &lt;= n; i ++) cin &gt;&gt; w[i];
+
+    for(int len = 3; len &lt;= n; len ++)
+        for(int l = 1; l + len - 1 &lt;= n; l ++){
+            int r = l + len - 1;
+            f[l][r] = INF;
+            for(int k = l + 1; k &lt; r; k ++)
+                f[l][r] = min(f[l][r], f[l][k] + f[k][r] + w[l] * w[k] * w[r]);      
+        }
+    cout &lt;&lt; f[1][n] &lt;&lt; endl;
+    return 0;
+}</code></pre></details></li></ul><ul id="8c9787ac-4151-47a6-b11f-a752da47a804" class="toggle"><li><details open=""><summary>高精度的写法</summary><pre id="b3bb6d1b-9ba1-48ef-8984-a4a60b08b628" class="code"><code>#include &lt;cstring&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+typedef long long LL;
+const int N = 55, M = 35, INF = 1e9;
+int n;
+int w[N];
+LL f[N][N][M];
+
+void add(LL a[], LL b[])
+{
+    static LL c[M];
+    memset(c, 0, sizeof c);
+    for (int i = 0, t = 0; i &lt; M; i ++ )
+    {
+        t += a[i] + b[i];
+        c[i] = t % 10;
+        t /= 10;
+    }
+    memcpy(a, c, sizeof c);
+}
+void mul(LL a[], LL b)
+{
+    static LL c[M];
+    memset(c, 0, sizeof c);
+    LL t = 0;
+    for (int i = 0; i &lt; M; i ++ )
+    {
+        t += a[i] * b;
+        c[i] = t % 10;
+        t /= 10;
+    }
+    memcpy(a, c, sizeof c);
+}
+
+int cmp(LL a[], LL b[])
+{
+    for (int i = M - 1; i &gt;= 0; i -- )
+        if (a[i] &gt; b[i]) return 1;
+        else if (a[i] &lt; b[i]) return -1;
+    return 0;
+}
+
+void print(LL a[])
+{
+    int k = M - 1;
+    while (k &amp;&amp; !a[k]) k -- ;
+    while (k &gt;= 0) cout &lt;&lt; a[k -- ];
+    cout &lt;&lt; endl;
+}
+
+int main()
+{
+    cin &gt;&gt; n;
+    for (int i = 1; i &lt;= n; i ++ ) cin &gt;&gt; w[i];
+
+    LL temp[M];
+    for (int len = 3; len &lt;= n; len ++ )
+        for (int l = 1; l + len - 1 &lt;= n; l ++ )
+        {
+            int r = l + len - 1;
+            f[l][r][M - 1] = 1;
+            for (int k = l + 1; k &lt; r; k ++ )
+            {
+                memset(temp, 0, sizeof temp);
+                temp[0] = w[l];
+                mul(temp, w[k]);
+                mul(temp, w[r]);
+                add(temp, f[l][k]);
+                add(temp, f[k][r]);
+                if (cmp(f[l][r], temp) &gt; 0)
+                    memcpy(f[l][r], temp, sizeof temp);
+            }
+        }
+
+    print(f[1][n]);
+
+    return 0;
+}</code></pre></details></li></ul></details></li></ul></div></div><h3 id="6b87f2ef-b925-4027-8f8a-e58c2085af94" class=""><details open=""><summary>4. 二维区间DP</summary></details></h3><div class="indented"><p id="b2d73e87-1d04-4264-af33-ec3c29f403cf" class="">
+</p></div></div></article></body></html>

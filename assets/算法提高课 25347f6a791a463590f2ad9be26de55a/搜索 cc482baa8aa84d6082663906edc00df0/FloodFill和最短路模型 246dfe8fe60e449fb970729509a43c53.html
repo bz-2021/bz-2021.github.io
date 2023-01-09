@@ -1,0 +1,1012 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>FloodFill和最短路模型</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="246dfe8f-e60e-449f-b970-729509a43c53" class="page sans"><header><div class="page-header-icon undefined"><span class="icon">🌊</span></div><h1 class="page-title">FloodFill和最短路模型</h1></header><div class="page-body"><p id="a8826b5b-5aaf-4189-bf8e-f5a5b6970302" class="">求解内部的最短路问题（两点）</p><p id="ac4f3fb6-9f16-46f1-86bb-5979f4f9ab43" class="">没有通用的算法模板</p><h3 id="23ae545e-3568-4161-9fbc-2818c93b019e" class=""><details open=""><summary>BFS </summary></details></h3><div class="indented"><p id="dda8e899-3786-46ab-a635-3c3564887e6e" class="">走迷宫的类型 （最短距离 两点之间） </p><p id="5344a689-a971-40d1-9726-69383c91cb53" class="">八数码（最少步数问题 从一种状态变为另一种状态）</p></div><ol type="1" id="7afb9b43-a5c0-455d-ad03-79ca51647646" class="numbered-list" start="1"><li>求最小</li></ol><ol type="1" id="60641dec-91bf-40ea-9a12-d74d592b10d9" class="numbered-list" start="2"><li>基于迭代的算法 特点：不会爆栈（优先选择BFS）</li></ol><h1 id="b8b00286-e401-497a-a1ae-9729f97935ed" class="">Flood Fill</h1><p id="0a8c9145-ee2e-46ed-9a85-f9fee564e5c1" class="">凸起来的和凹进去的 每次随便选一个格子 然后往里面注水 按照宽搜的过程进行覆盖</p><p id="908f58f8-9288-4261-9ed2-83e5dd835c75" class="">依次遍历周围的所有的格子 不一定按照宽搜的顺序进行 看能否扩展别的格子</p><ul id="4ba516fb-5b0a-49fb-b02c-963da2df51a1" class="bulleted-list"><li style="list-style-type:disc">可以在线性的时间的复杂度内找到某个点所在的连通块</li></ul><h3 id="d31db26d-c573-4e95-8eae-fa9b40dc4de0" class=""><details open=""><summary>1097. 池塘计数 </summary></details></h3><div class="indented"><ul id="719bc216-2208-488a-a245-4b9b9d291291" class="toggle"><li><details open=""><summary>题目</summary><p id="f79e452d-62ab-4f45-a55c-5df41b59076f" class="">农夫约翰有一片 $N\*M$ 的矩形土地。</p><p id="dca1eac5-2b2b-45fa-b6cd-2f788e536db1" class="">最近，由于降雨的原因，部分土地被水淹没了。</p><p id="cf5dae00-ec56-42bf-b7b8-1350660fe5a9" class="">现在用一个字符矩阵来表示他的土地。</p><p id="0156da7c-e748-44c4-8463-0ae15ec53dfa" class="">每个单元格内，如果包含雨水，则用”W”表示，如果不含雨水，则用”.”表示。</p><p id="1d230040-b10f-4ce5-a45c-27e050472561" class="">现在，约翰想知道他的土地中形成了多少片池塘。</p><p id="9268564b-499a-4547-9952-7a25bdfe66aa" class="">每组相连的积水单元格集合可以看作是一片池塘。</p><p id="9bb13d33-a75b-4d45-bc6a-4c722258f87a" class="">每个单元格视为与其上、下、左、右、左上、右上、左下、右下八个邻近单元格相连。</p><p id="add6465f-548c-4c36-84d3-8df8023b857a" class="">请你输出共有多少片池塘，即矩阵中共有多少片相连的”W”块。</p><h3 id="693b8ee6-9c74-45eb-b331-c1d6598e687c" class="">输入格式</h3><p id="a9522869-557f-4add-8b14-09d9809ee3a7" class="">第一行包含两个整数 $N$ 和 $M$。</p><p id="a52e038e-6e06-46bf-b0dc-ed5d47e3e969" class="">接下来 $N$ 行，每行包含 $M$ 个字符，字符为”W”或”.”，用以表示矩形土地的积水状况，字符之间没有空格。</p><h3 id="c5bd4ba5-d77d-4ec0-9183-268e8108404e" class="">输出格式</h3><p id="8f411c88-524a-4220-8d07-9883b822b40f" class="">输出一个整数，表示池塘数目。</p><h3 id="bd8f1b90-7d17-43c4-b8ab-3a54ba77aea4" class="">数据范围</h3><p id="530decf0-17f1-4139-8607-76b6d5fe472e" class="">$1 \\le N,M \\le 1000$</p><h3 id="c2b3eaf9-1db3-473a-a1d7-1796ebb6e9e0" class="">输入样例：</h3><pre id="ce9b2546-7e1d-4cdd-84bc-d1cc86bfd4c2" class="code code-wrap"><code>10 12
+W........WW.
+.WWW.....WWW
+....WW...WW.
+.........WW.
+.........W..
+..W......W..
+.W.W.....WW.
+W.W.W.....W.
+.W.W......W.
+..W.......W.</code></pre><h3 id="47e1c710-5676-4501-ba2a-8fa0034abaaf" class="">输出样例：</h3><pre id="7e10f120-f88d-4118-97d4-0c923a67abd4" class="code code-wrap"><code>3</code></pre></details></li></ul><ul id="91e3370b-2084-49b8-9fe6-7c93b7f21773" class="toggle"><li><details open=""><summary>解答</summary><pre id="0adb55dd-8162-4d13-b5d4-4e010d8fe5c2" class="code"><code>#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+
+#define x first 
+#define y second
+
+using namespace std;
+
+typedef pair&lt;int, int&gt; PII;
+const int N = 1010, M = N * N;
+
+int n, m, cnt;
+char g[N][N];
+PII q[M];
+bool st[N][N];
+
+void bfs(int sx, int sy){
+    int hh = 0, tt = 0;
+    q[0] = {sx, sy};
+    st[sx][sy] = true;
+    
+    while(hh &lt;= tt){
+        PII t = q[hh ++];
+        
+        for(int i = t.x - 1; i &lt;= t.x + 1; i ++)
+            for(int j = t.y - 1; j &lt;= t.y + 1; j ++){
+                if(i == t.x &amp;&amp; j == t.y) continue;
+                if(i &lt; 0 || i &gt;= n || j &lt; 0 || j &gt;= m) continue;
+                if(g[i][j] == &#x27;.&#x27; || st[i][j]) continue;
+                q[ ++ tt ] = {i, j};
+                st[i][j] = true;
+            }
+                
+    }
+}
+
+int main(){
+    scanf(&quot;%d %d&quot;, &amp;n, &amp;m);
+    for(int i = 0; i &lt; n; i ++) scanf(&quot;%s&quot;, g[i]);
+    int cnt = 0;
+    for(int i = 0; i &lt; n; i ++)
+        for(int j = 0; j &lt; m; j ++)
+            if(g[i][j] == &#x27;W&#x27; &amp;&amp; !st[i][j]){
+                bfs(i, j);
+                cnt ++;
+            }
+    cout &lt;&lt; cnt &lt;&lt; endl;
+    return 0;
+}</code></pre></details></li></ul></div><h3 id="1519e56e-8e7f-473f-a99a-bd2fd0565a98" class=""><details open=""><summary>1098. 城堡问题</summary></details></h3><div class="indented"><ul id="6978f95a-556a-4731-8b19-6f0efc9f2d6f" class="toggle"><li><details open=""><summary>题目</summary><figure id="39464841-bde7-4410-ad82-0afca9ee8547" class="image"><a href="FloodFill%E5%92%8C%E6%9C%80%E7%9F%AD%E8%B7%AF%E6%A8%A1%E5%9E%8B%20246dfe8fe60e449fb970729509a43c53/Untitled.png"><img style="width:389px" src="FloodFill%E5%92%8C%E6%9C%80%E7%9F%AD%E8%B7%AF%E6%A8%A1%E5%9E%8B%20246dfe8fe60e449fb970729509a43c53/Untitled.png"/></a></figure><pre id="aee8db9b-8316-41f8-bd2b-9df1f2822c34" class="code code-wrap"><code>   #  = Wall
+   |  = No wall
+   -  = No wall
+
+   方向：上北下南左西右东。</code></pre><p id="f070220b-6cf7-45d9-a65b-5f932fd23827" class="">图1是一个城堡的地形图。</p><p id="e76847f4-d957-4a13-b179-07250af32077" class="">请你编写一个程序，计算城堡一共有多少房间，最大的房间有多大。</p><p id="266b462d-9f3c-4ad1-b2d9-cec6d51f4771" class="">城堡被分割成 $m\*n$个方格区域，每个方格区域可以有0~4面墙。</p><p id="22202cfe-ddd4-4485-8448-e8fb4a0f2750" class="">注意：墙体厚度忽略不计。</p><h3 id="9492db6a-3bc1-422a-8717-005de49b1a5b" class="">输入格式</h3><p id="b874826e-8a30-4e2f-bd55-ae1975cdb1f1" class="">第一行包含两个整数 $m$ 和 $n$，分别表示城堡南北方向的长度和东西方向的长度。</p><p id="a81c84e8-f45e-43b5-9d5e-c677a6e25561" class="">接下来 $m$ 行，每行包含 $n$ 个整数，每个整数都表示平面图对应位置的方块的墙的特征。</p><p id="0a2c05fc-bf8e-4a67-a9b7-ec7a8eaa64ad" class="">每个方块中墙的特征由数字 $P$ 来描述，我们用1表示西墙，2表示北墙，4表示东墙，8表示南墙，$P$ 为该方块包含墙的数字之和。</p><p id="2e4cd349-ba31-4a60-8dee-85cb7f0d738d" class="">例如，如果一个方块的 $P$ 为3，则 3 = 1 + 2，该方块包含西墙和北墙。</p><p id="8d82e1e2-a460-4061-b161-db1456e400ae" class="">城堡的内墙被计算两次，方块(1,1)的南墙同时也是方块(2,1)的北墙。</p><p id="4a631d3a-b1cc-444a-8513-b3f3f241d06b" class="">输入的数据保证城堡至少有两个房间。</p><h3 id="1abe82c4-75ff-4cad-bb25-646a03f5efd2" class="">输出格式</h3><p id="175c0b1a-82b3-4913-a73a-46b834c84c9e" class="">共两行，第一行输出房间总数，第二行输出最大房间的面积（方块数）。</p><h3 id="0c062eaa-936c-4b51-86e8-819ff1808d38" class="">数据范围</h3><p id="fb0e0cb6-6714-4322-98a2-459b75dac867" class="">$1 \\le m,n \\le 50$,
+$0 \\le P \\le 15$</p><h3 id="9ff05eef-b5ff-4bec-8226-c6fe1ffa9b5a" class="">输入样例：</h3><pre id="6e75eed8-e143-4b2a-912e-6ebc12f5b10e" class="code code-wrap"><code>4 7
+11 6 11 6 3 10 6
+7 9 6 13 5 15 5
+1 10 12 7 13 7 5
+13 11 10 8 10 12 13</code></pre><h3 id="a9994832-2667-49c6-a5f1-e9079e55d744" class="">输出样例：</h3><pre id="64c15711-f921-452d-9222-e4f1b777c7a6" class="code code-wrap"><code>5
+9</code></pre></details></li></ul><ul id="da23388d-1619-4fc1-baa7-d5d0d29239ab" class="toggle"><li><details open=""><summary>解答</summary><pre id="a5fe3efd-f181-40db-8053-7fe5cd639bb2" class="code"><code>#include&lt;iostream&gt;
+#include&lt;algorithm&gt;
+#define x first
+#define y second
+using namespace std;
+
+typedef pair&lt;int, int&gt; PII;
+
+const int N = 55, M = N * N;
+int n, m;
+int g[N][N];
+bool st[N][N];
+PII q[M];
+
+int bfs(int sx, int sy){
+    int dy[4] = {-1, 0, 1, 0}, dx[4] = {0, -1, 0, 1};
+    int tt = 0, hh = 0;
+    
+    int area = 0;
+    
+    q[0] = {sx, sy};
+    st[sx][sy] = true;
+    
+    while(hh &lt;= tt){
+        PII t = q[hh ++];
+        area ++;
+        
+        for(int i = 0; i &lt; 4; i ++){
+            int a = t.x + dx[i], b = t.y + dy[i];
+            if(a &lt; 0 || a &gt;= n || b &lt; 0 || b &gt;= m) continue;
+            if(st[a][b]) continue;
+            if(g[t.x][t.y] &gt;&gt; i &amp; 1) continue;
+            
+            q[++ tt] = {a, b};
+            st[a][b] = true;
+        }
+    }
+    return area;
+}
+
+int main(){
+    int res = 0, cnt = 0;
+    cin &gt;&gt; n &gt;&gt; m;
+    for(int i = 0; i &lt; n ;i ++)
+        for(int j = 0; j &lt; m; j ++)
+            cin &gt;&gt; g[i][j];
+    for(int i = 0; i &lt; n; i ++)
+        for(int j = 0; j &lt; m; j ++)
+            if(!st[i][j]){
+                res = max(res, bfs(i, j));
+                cnt ++;
+            }
+            
+    cout &lt;&lt; cnt &lt;&lt; endl;
+    cout &lt;&lt; res &lt;&lt; endl;
+    return 0;
+}</code></pre></details></li></ul></div><h3 id="abc0e64d-39d9-438d-887b-77cbdefab5da" class=""><details open=""><summary>1106. 山谷和山峰</summary></details></h3><div class="indented"><ul id="371ccdb9-aca5-488b-9a15-31837c0a699e" class="toggle"><li><details open=""><summary>题目</summary><p id="97656b24-0c30-4661-b203-a92970af9eb5" class="">FGD小朋友特别喜欢爬山，在爬山的时候他就在研究山峰和山谷。</p><p id="31a850c9-a100-495d-9a47-35a71e15ee5b" class="">为了能够对旅程有一个安排，他想知道山峰和山谷的数量。</p><p id="d833bcd1-b81f-4b1b-bdb5-48f69a3e113b" class="">给定一个地图，为FGD想要旅行的区域，地图被分为 $n \\times n$ 的网格，每个格子 $(i,j)$ 的高度 $w(i,j)$ 是给定的。</p><p id="876da47d-57d2-4c3a-a428-6cfee7bdef40" class="">若两个格子有公共顶点，那么它们就是相邻的格子，如与 $(i,j)$ 相邻的格子有$(i-1, j-1),(i-1,j),(i-1,j+1),(i,j-1),(i,j+1),(i+1,j-1),(i+1,j),(i+1,j+1)$。</p><p id="f669b91b-e0d8-4007-810e-ff8e5b1e4833" class="">我们定义一个格子的集合 $S$ 为山峰（山谷）当且仅当：</p><ol type="1" id="aa3801e4-728e-4f19-8d11-b33b247af535" class="numbered-list" start="1"><li>$S$ 的所有格子都有相同的高度。</li></ol><ol type="1" id="fdebf282-ce09-4547-bd74-13635f684345" class="numbered-list" start="2"><li>$S$ 的所有格子都连通。</li></ol><ol type="1" id="0257a588-6c84-4403-833e-91e563f0ece6" class="numbered-list" start="3"><li>对于 $s$ 属于 $S$，与 $s$ 相邻的 $s’$ 不属于 $S$，都有 $w\<em>s &gt; w\</em>{s’}$（山峰），或者 $w\<em>s &lt; w\</em>{s’}$（山谷）。</li></ol><ol type="1" id="8942eb4e-60a2-4c33-a9f1-e06e8f69b9ff" class="numbered-list" start="4"><li>如果周围不存在相邻区域，则同时将其视为山峰和山谷。</li></ol><p id="f3062acd-b7c8-470c-aee6-2ef019458405" class="">你的任务是，对于给定的地图，求出山峰和山谷的数量，如果所有格子都有相同的高度，那么整个地图即是山峰，又是山谷。</p><h3 id="b76d9fd4-a980-49ec-bd7b-cd5cac175e21" class="">输入格式</h3><p id="3da11e52-627b-4e64-af9b-a234bb8a5d5f" class="">第一行包含一个正整数 $n$，表示地图的大小。</p><p id="62b5ad01-a092-4016-9fea-b318e0666c83" class="">接下来一个 $n \\times n$ 的矩阵，表示地图上每个格子的高度 $w$。</p><h3 id="2cb044a9-f6ab-4904-bdbb-57899a5eef56" class="">输出格式</h3><p id="c05f3ebf-0591-46fe-951e-25dae853a04f" class="">共一行，包含两个整数，表示山峰和山谷的数量。</p><h3 id="ab462d06-72c0-41d2-965d-6c835447b621" class="">数据范围</h3><p id="69c9a7a6-9708-4935-85fc-be4ad3df77ce" class="">$1 \\le n \\le 1000$,
+$0 \\le w \\le 10^9$</p><h3 id="c0c81ab7-7ac6-4a8e-9e14-57c720db4637" class="">输入样例1：</h3><pre id="57142c07-c13b-4220-b669-feb79b5e4e12" class="code code-wrap"><code>5
+8 8 8 7 7
+7 7 8 8 7
+7 7 7 7 7
+7 8 8 7 8
+7 8 8 8 8</code></pre><h3 id="653c80a6-05ce-445b-aa2b-af5b74305717" class="">输出样例1：</h3><pre id="1aab5cba-b307-4467-bb40-7c294d818c75" class="code code-wrap"><code>2 1</code></pre><h3 id="c9b79536-0e6f-45ce-af89-a56f66edfca0" class="">输入样例2：</h3><pre id="0e03fcb2-4123-4882-953d-d739b9ee9ac7" class="code code-wrap"><code>5
+5 7 8 3 1
+5 5 7 6 6
+6 6 6 2 8
+5 7 2 5 8
+7 1 0 1 7</code></pre><h3 id="729554ab-b7a9-4adc-ac68-befb2d36b6e4" class="">输出样例2：</h3><pre id="4eb900ec-429c-4a91-a564-a60ce702519a" class="code code-wrap"><code>3 3</code></pre><h3 id="fbd3228b-478a-412e-952c-861e0a346388" class="">样例解释</h3><p id="402c3e9b-b208-421e-945f-611cc48ef1b6" class="">样例1：</p><figure id="63e00bc5-490a-4687-ba26-66895e304e00" class="image"><a href="https://cdn.acwing.com/media/article/image/2019/10/16/19_0250799aef-1.png"><img style="width:192px" src="https://cdn.acwing.com/media/article/image/2019/10/16/19_0250799aef-1.png"/></a></figure><p id="b7994d4a-3878-49bd-a79d-6d0822f7dd5f" class="">样例2：</p><figure id="d4fad7c8-c7d7-45da-bc45-d963d33b97d9" class="image"><a href="https://cdn.acwing.com/media/article/image/2019/10/16/19_08db5e60ef-2.png"><img style="width:192px" src="https://cdn.acwing.com/media/article/image/2019/10/16/19_08db5e60ef-2.png"/></a></figure></details></li></ul><ul id="06c24a1f-2955-4467-a26f-acf3d2d840e8" class="toggle"><li><details open=""><summary>解答</summary><pre id="4fe2149d-75e3-4e88-a792-29cebb4de1a5" class="code"><code>#include&lt;iostream&gt;
+#include&lt;algorithm&gt;
+#define x first
+#define y second
+using namespace std;
+typedef pair&lt;int, int&gt; PII;
+const int N = 1010, M = N * N;
+int n, sf, sg; 
+int g[N][N];
+bool st[N][N];
+PII q[M];
+void bfs(int sx, int sy){
+    int dx[8] = {0, 1, 0, -1, 1, 1, -1, -1}, dy[8] = {1, 0, -1, 0, 1, -1, 1, -1};
+    int hh = 0, tt = 0;
+    q[0] = {sx, sy};
+    st[sx][sy] = true;
+    bool sgs = true, sfs = true;
+    while(hh &lt;= tt){
+        PII t = q[hh ++];
+        for(int i = 0; i &lt; 8; i ++){
+            int a = t.x + dx[i], b = t.y + dy[i];
+            if(a &lt; 0 || a &gt;= n || b &lt; 0 || b &gt;= n) continue;
+            if(g[a][b] &lt; g[t.x][t.y]) sgs = false;
+            if(g[a][b] &gt; g[t.x][t.y]) sfs = false;
+            if(st[a][b]) continue;
+            if(g[a][b] != g[t.x][t.y]) continue;
+            
+            q[++ tt] = {a, b};
+            st[a][b] = true;
+        }
+    }
+    if(sgs) sg ++;
+    if(sfs) sf ++;
+}
+int main(){
+    cin &gt;&gt; n;
+    for(int i = 0; i &lt; n; i ++)
+        for(int j = 0; j &lt; n; j ++)
+            cin &gt;&gt; g[i][j];
+    for(int i = 0; i &lt; n; i ++)
+        for(int j = 0; j &lt; n; j ++)
+            if(!st[i][j]) bfs(i, j);
+    cout &lt;&lt; sf &lt;&lt; &quot; &quot; &lt;&lt; sg &lt;&lt; endl;
+}</code></pre></details></li></ul></div><h1 id="b18d4bb1-44ef-4581-81d2-bb841b9ece16" class="">最短路模型</h1><p id="66d3df8c-ce90-45a3-a5fe-1fd7e875c552" class="">宽搜相对于深搜的性质：所有边权重相同时 可以找到最短的路径（线性的复杂度下）</p><p id="dc54b66f-14d4-4e9d-b56b-cd50397be42e" class="">求最短路的长度和记录路径（开一个新的数组，将st数组扩展为pair类型，记录是从哪个格子来的）</p><h3 id="c5775fe9-3612-4e48-aeeb-727303684832" class=""><details open=""><summary>1076. 迷宫问题</summary></details></h3><div class="indented"><ul id="3f462464-5379-4c47-ad70-ad225b5a18d2" class="toggle"><li><details open=""><summary>问题</summary><p id="6359bd9d-df8e-411d-9752-88a6fb87488f" class="">给定一个 $n \\times n$ 的二维数组，如下所示：</p><pre id="a906ae44-a8a6-4b99-8b1a-6db2257b23b1" class="code code-wrap"><code>int maze[5][5] = {
+
+0, 1, 0, 0, 0,
+
+0, 1, 0, 1, 0,
+
+0, 0, 0, 0, 0,
+
+0, 1, 1, 1, 0,
+
+0, 0, 0, 1, 0,
+
+};</code></pre><p id="7d932db3-abae-469b-9de1-7873d63b332b" class="">它表示一个迷宫，其中的1表示墙壁，0表示可以走的路，只能横着走或竖着走，不能斜着走，要求编程序找出从左上角到右下角的最短路线。</p><p id="c5f3d826-fcfd-46ba-ad79-ba51c6eecf03" class="">数据保证至少存在一条从左上角走到右下角的路径。</p><h3 id="08dcc5ab-dd74-42bf-b632-32c4819dd312" class="">输入格式</h3><p id="352cffdb-2159-42b8-bd59-8cde8c07355b" class="">第一行包含整数 n。</p><p id="c83dc19f-bf11-4487-aa5f-8c11d15d0259" class="">接下来 $n$ 行，每行包含 $n$ 个整数 0 或 1，表示迷宫。</p><h3 id="bc75b36c-0808-42dc-8164-852bd8b2585b" class="">输出格式</h3><p id="abf4280c-acb4-43c1-951e-7936cb2a2976" class="">输出从左上角到右下角的最短路线，如果答案不唯一，输出任意一条路径均可。</p><p id="bf1a76ee-d43c-4c6c-a0a2-d8c45494113e" class="">按顺序，每行输出一个路径中经过的单元格的坐标，左上角坐标为 $(0,0)$，右下角坐标为 $(n-1,n-1)$。</p><h3 id="b52b4dbe-599f-4877-957e-cc6eebacc098" class="">数据范围</h3><p id="672ed492-ef71-4878-b9c1-3445ec435411" class="">$0 \\le n \\le 1000$</p><h3 id="285cbb36-9b2a-44e0-9246-8a52da9a1a7c" class="">输入样例：</h3><pre id="676b99fc-228e-4cc6-9b3c-1e87473268e9" class="code code-wrap"><code>5
+0 1 0 0 0
+0 1 0 1 0
+0 0 0 0 0
+0 1 1 1 0
+0 0 0 1 0</code></pre><h3 id="e0f02991-9046-4eaf-9b89-df4be00806d3" class="">输出样例：</h3><pre id="239ce51e-e5d7-43fb-8fcc-c1cbdaa99deb" class="code code-wrap"><code>0 0
+1 0
+2 0
+2 1
+2 2
+2 3
+2 4
+3 4
+4 4</code></pre></details></li></ul><ul id="db5f77ac-a055-4b39-88ba-3e994719fdfc" class="toggle"><li><details open=""><summary>解答</summary><pre id="c7b7ee43-8119-4f91-920e-bba6a4276e99" class="code"><code>#include&lt;iostream&gt;
+#include&lt;algorithm&gt;
+#include&lt;cstring&gt;
+#define x first
+#define y second
+using namespace std;
+typedef pair&lt;int, int&gt; PII;
+const int N = 1010, M = N * N;
+int g[N][N];
+int n;
+PII q[M];
+PII pre[N][N];
+void bfs(int sx, int sy){
+    int dx[4] = {1, 0, -1, 0}, dy[4] = {0, -1, 0, 1};
+    int hh = 0, tt = 0;
+    q[0] = {sx, sy};
+    memset(pre, -1, sizeof pre);
+    pre[sx][sy] = {0, 0}; // 可以是任何数但不能是-1
+    while(hh &lt;= tt){
+        PII t = q[hh ++];
+        for(int i = 0; i &lt; 4; i ++){
+            int a = t.x + dx[i], b = t.y + dy[i];
+            if(a &lt; 0 || a &gt;= n || b &lt; 0 || b &gt;= n) continue;
+            if(g[a][b]) continue; // 如果是墙则不能走
+            if(pre[a][b].x != -1) continue;
+            q[ ++ tt] = {a, b};
+            pre[a][b] = t;
+        }
+    }
+}
+int main(){
+    cin &gt;&gt; n;
+    for(int i = 0; i &lt; n; i ++)
+        for(int j = 0; j &lt; n; j ++)
+            cin &gt;&gt; g[i][j];
+    bfs(n - 1, n - 1); // 倒序进行广搜 这样在输出路径的时候就不需要再缓存
+    PII end(0, 0);
+    while(true){
+        cout &lt;&lt; end.x &lt;&lt; &quot; &quot; &lt;&lt; end.y &lt;&lt; endl;
+        if(end.x == n - 1 &amp;&amp; end.y == n - 1) break;
+        end = pre[end.x][end.y];
+    }
+    return 0;
+}</code></pre></details></li></ul></div><h3 id="9dbd3942-53f9-452f-9b77-6c62cde1ceca" class=""><details open=""><summary><strong>188. 武士风度的牛</strong></summary></details></h3><div class="indented"><ul id="67346b49-25ea-4ea8-8095-2ed998ed664f" class="toggle"><li><details open=""><summary>题目</summary><p id="5a95a669-7852-4683-9e3e-fe4239f98dbf" class="">农民 John 有很多牛，他想交易其中一头被 Don 称为 The Knight 的牛。</p><p id="1bd95aff-0dda-432f-87b0-2aa6aa71fc17" class="">这头牛有一个独一无二的超能力，在农场里像 Knight 一样地跳（就是我们熟悉的象棋中马的走法）。</p><p id="74f5f480-e244-4306-8fc5-4befbe6268d0" class="">虽然这头神奇的牛不能跳到树上和石头上，但是它可以在牧场上随意跳，我们把牧场用一个 x，y 的坐标图来表示。</p><p id="91f8bcba-bc78-4a57-b68e-9d451de00bfe" class="">这头神奇的牛像其它牛一样喜欢吃草，给你一张地图，上面标注了 The Knight 的开始位置，树、灌木、石头以及其它障碍的位置，除此之外还有一捆草。</p><p id="c4557429-fd6c-48e8-bf44-a47b206ca8fc" class="">现在你的任务是，确定 The Knight 要想吃到草，至少需要跳多少次。</p><p id="00d5dce2-b4ae-462f-a20f-656cc67ba964" class="">The Knight 的位置用 <code>K</code> 来标记，障碍的位置用 <code>*</code> 来标记，草的位置用 <code>H</code> 来标记。</p><p id="050b5858-8e21-458d-8f6d-912c75a46458" class=""><strong>注意：</strong> 数据保证一定有解。</p><h3 id="5540d020-0a8a-4039-9c57-f31248e99c78" class="">输入格式</h3><p id="7408ecc6-4a2e-42de-8b66-6f54fb29bf9e" class="">第 1 行： 两个数，表示农场的列数 $C$ 和行数 $R$。</p><p id="7c354db0-d9cd-4e72-9d7e-5300251c18a5" class="">第 2..R+1 行: 每行一个由 $C$ 个字符组成的字符串，共同描绘出牧场地图。</p><h3 id="f07a00a6-649a-43f4-95d1-05cb777cb012" class="">输出格式</h3><p id="11dec97d-04ee-470f-a41a-f66eb68b5a25" class="">一个整数，表示跳跃的最小次数。</p><h3 id="68abf248-138d-48bd-a5f8-ecaa83a04f19" class="">数据范围</h3><p id="67e746b5-042d-41de-bf39-8614773c9706" class="">$1 \\le R,C \\le 150$</p><h3 id="79a45776-35c8-423a-89ef-2bd0b780ed98" class="">输入样例：</h3><pre id="68084f55-c974-4bc4-9a2e-3079f0543579" class="code code-wrap"><code>10 11
+..........
+....*.....
+..........
+...*.*....
+.......*..
+..*..*...H
+*.........
+...*...*..
+.K........
+...*.....*
+..*....*..</code></pre><h3 id="b797b94d-33f7-44f6-b5f1-aec86997bcd1" class="">输出样例：</h3><pre id="f824717a-6317-47a9-88d4-362cd1cf8606" class="code code-wrap"><code>5</code></pre></details></li></ul><ul id="03eec1da-65a2-4dab-92e7-da0235982eab" class="toggle"><li><details open=""><summary>解答</summary><pre id="6b250107-ab55-41f1-9958-9835b35bd6ce" class="code"><code>#include&lt;iostream&gt;
+#include&lt;cstring&gt;
+#include&lt;algorithm&gt;
+#define x first
+#define y second
+using namespace std;
+typedef pair&lt;int, int&gt; PII;
+const int N = 155, M = N * N;
+int n, m, res, ae, be;
+char g[N][N];
+PII q[M];
+int dist[N][N];
+void bfs(int sx, int sy){
+    int dx[8] = {1, 1, 2, 2, -1, -1, -2, -2};
+    int dy[8] = {2, -2, 1, -1, 2, -2, 1, -1};
+    int hh = 0, tt = 0;
+    q[0] = {sx, sy};
+    dist[sx][sy] = 0;
+    while(hh &lt;= tt){
+        PII t = q[hh ++];
+        for(int i = 0; i &lt; 8; i ++){
+            int a = t.x + dx[i], b = t.y + dy[i];
+            if(a == ae &amp;&amp; b == be) {
+                res = dist[t.x][t.y] + 1;
+                return ;
+            }
+            if(a &lt; 0 || a &gt;= n || b &lt; 0 || b &gt;= m) continue;
+            if(g[a][b] == &#x27;*&#x27;) continue;
+            if(dist[a][b] != -1) continue;
+            q[++ tt] = {a, b};
+            dist[a][b] = dist[t.x][t.y] + 1;
+        }
+    }
+}
+int main(){
+    int as, bs;
+    cin &gt;&gt; m &gt;&gt; n;
+    for(int i = 0; i &lt; n; i ++) {
+        cin &gt;&gt; g[i];
+        for(int j = 0; j &lt; m; j ++){
+            if(g[i][j] == &#x27;K&#x27;) as = i, bs = j;
+            if(g[i][j] == &#x27;H&#x27;) ae = i, be = j;
+        }
+    }
+    memset(dist, -1, sizeof dist);
+    bfs(as, bs);
+    cout &lt;&lt; res &lt;&lt; endl;
+    return 0;
+}</code></pre></details></li></ul></div><h3 id="1e639e60-39ea-4128-bab3-221a212c026f" class=""><details open=""><summary>1100. 抓住那头牛</summary></details></h3><div class="indented"><ul id="9465ab2e-6cf3-43e4-9cdb-77b630c681b9" class="toggle"><li><details open=""><summary>题目</summary><p id="fcfd7a1d-1a22-4def-9be6-966e1673fab0" class="">农夫知道一头牛的位置，想要抓住它。</p><p id="445d8032-a3b7-4b8a-b2f6-f1b16e9f0622" class="">农夫和牛都位于数轴上，农夫起始位于点 N，牛位于点 K。</p><p id="298990a2-b527-4701-be7b-267dd120c9ba" class="">农夫有两种移动方式：</p><ol type="1" id="309dda09-5d92-4191-ae6c-85d84344d429" class="numbered-list" start="1"><li>从 X 移动到 X-1 或 X+1，每次移动花费一分钟</li></ol><ol type="1" id="e62703b6-4a59-4800-8631-7e28a8b681da" class="numbered-list" start="2"><li>从 X 移动到 2*X，每次移动花费一分钟</li></ol><p id="211bec66-dbd3-4384-90ea-22b9a4461341" class="">假设牛没有意识到农夫的行动，站在原地不动。</p><p id="e3a5ae47-8ad6-4b0f-9a2a-f682ceec6e77" class="">农夫最少要花多少时间才能抓住牛？</p><h3 id="08a3f866-5235-4e6b-a6e9-2ea0d06a7658" class="">输入格式</h3><p id="660af1b9-c562-4309-933e-04ad6722838d" class="">共一行，包含两个整数 N 和 K 。</p><h3 id="8eb32c49-dd9c-49dd-bdc7-4e36b1e19e23" class="">输出格式</h3><p id="c1bc6860-3952-48c6-ae37-d988bd5097de" class="">输出一个整数，表示抓到牛所花费的最少时间。</p><h3 id="3d3f9fa0-45fd-4920-9eb4-ad023631adff" class="">数据范围</h3><p id="b862ca24-a914-4f8e-883f-8128df0746fe" class="">0 ≤ N,K ≤ 10^5</p><h3 id="57471600-b0fa-4be2-b77e-3dc12c53308b" class="">输入样例：</h3><pre id="b2dd5416-dee7-4dcb-b613-4dd51a23482b" class="code code-wrap"><code>5 17</code></pre><h3 id="d95b6924-bbc3-4479-801d-bd5a3aa4cb36" class="">输出样例：</h3><pre id="f31ac6e2-ee0c-458b-809a-8a419f4c2dad" class="code code-wrap"><code>4</code></pre></details></li></ul><ul id="0b560f71-6df1-425a-b923-3d4fdc9d570b" class="toggle"><li><details open=""><summary>解答</summary><pre id="6a3b908c-4ceb-4504-a789-c11eace48a62" class="code"><code>#include&lt;iostream&gt;
+#include&lt;cstring&gt;
+#include&lt;algorithm&gt;
+using namespace std;
+const int N = 2e5 + 10;
+int n, k;
+int dist[N];
+int q[N];
+int bfs(){
+    memset(dist, -1, sizeof dist);
+    int hh = 0, tt = 0;
+    q[0] = n;
+    dist[n] = 0;
+    
+    while(hh &lt;= tt){
+        int t = q[hh ++];
+        if(t == k) return dist[k];
+        if(t + 1 &lt; N &amp;&amp; dist[t + 1] == -1){
+            dist[t + 1] = dist[t] + 1;
+            q[ ++ tt] = t + 1;
+        }
+        if(t - 1 &lt; N &amp;&amp; dist[t - 1] == -1){
+            dist[t - 1] = dist[t] + 1;
+            q[ ++ tt] = t - 1;
+        }
+        if(t * 2 &lt; N &amp;&amp; dist[t * 2] == -1){
+            dist[t * 2] = dist[t] + 1;
+            q[ ++ tt] = t * 2;
+        }
+    }
+    return -1;
+    
+}
+int main(){
+    cin &gt;&gt; n &gt;&gt; k;
+    cout &lt;&lt; bfs() &lt;&lt; endl;
+    return 0;
+}</code></pre></details></li></ul></div></div></article></body></html>

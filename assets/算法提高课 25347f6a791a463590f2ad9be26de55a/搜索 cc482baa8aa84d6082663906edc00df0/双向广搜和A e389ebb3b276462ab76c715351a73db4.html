@@ -1,0 +1,850 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>双向广搜和A*</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="e389ebb3-b276-462a-b76c-715351a73db4" class="page sans"><header><div class="page-header-icon undefined"><span class="icon">↔️</span></div><h1 class="page-title">双向广搜和A*</h1></header><div class="page-body"><h1 id="13b0356a-1132-44dc-80e9-491522efa508" class="">双向广搜</h1><p id="e2ce5b24-1cb1-49ee-ba7d-8061678f3991" class="">维护两个队列进行广搜，每次选择size比较小的队列进行扩展（剪枝的艺术）</p><p id="91f2ba4d-f5bd-48b8-ad9d-06c5a491e19c" class="">每次应当扩展完完整的一层，如果只扩展一个结点，则不能保证正确性</p><h3 id="6476808d-a7c2-4425-a991-f4105303a246" class=""><details open=""><summary>190. 字串变换</summary></details></h3><div class="indented"><ul id="43b23cbf-99fb-4b2e-a7cd-64b1520da3c4" class="toggle"><li><details open=""><summary>题目</summary><figure id="62bce3e9-a24d-44db-b6ad-6d90650ac649" class="image"><a href="%E5%8F%8C%E5%90%91%E5%B9%BF%E6%90%9C%E5%92%8CA%20e389ebb3b276462ab76c715351a73db4/Untitled.png"><img style="width:576px" src="%E5%8F%8C%E5%90%91%E5%B9%BF%E6%90%9C%E5%92%8CA%20e389ebb3b276462ab76c715351a73db4/Untitled.png"/></a></figure><p id="5b0f09bf-440f-4b7e-bc08-439b180d4e92" class="">第一行是两个给定的字符串 A 和 B。</p><p id="b1e0756c-86d0-4b7a-b8cb-464ce7d9ded9" class="">接下来若干行，每行描述一组字串变换的规则。</p><p id="04cb1a0c-9317-4f89-8fc9-78df4a5ef73a" class="">所有字符串长度的上限为 20。</p><h3 id="ac0d834f-3148-4a3b-bb16-fa5d505b6569" class="">输出格式</h3><p id="b47b1175-f421-4c05-937a-d35ee475ead9" class="">若在 10 步（包含 10 步）以内能将 A 变换为 B ，则输出最少的变换步数；</p><p id="2c8f4238-7c11-45ec-894c-f4f47a1c0719" class="">否则输出 <code>NO ANSWER!</code>。</p><h3 id="8274b522-745c-4dcb-ab49-1667333f3a30" class="">输入样例：</h3><pre id="ef677759-8007-4b0d-8eb6-ceed83663d2b" class="code code-wrap"><code>abcd xyz
+abc xu
+ud y
+y yz</code></pre><h3 id="7c6893d1-6aa1-48c2-9b2e-ecc8f41e152d" class="">输出样例：</h3><pre id="b8c4a7bb-8ba4-4e03-8d7c-9282ac71ee7c" class="code code-wrap"><code>3</code></pre></details></li></ul><ul id="6ded86d7-f696-44dc-bf4d-7b89861e5b97" class="toggle"><li><details open=""><summary>解答</summary><ul id="60afcf25-ca68-463b-ac6a-9c8b875983ca" class="toggle"><li><details open=""><summary>按照节点进行扩展（错误的）</summary><pre id="d979b848-1e02-4a70-a118-25f6030b1f94" class="code"><code>#include&lt;iostream&gt;
+#include&lt;algorithm&gt;
+#include&lt;cstring&gt;
+#include&lt;unordered_map&gt;
+#include&lt;queue&gt;
+using namespace std;
+int n;
+string a[6], b[6];
+int extend(queue&lt;string&gt; &amp;q, 
+					 unordered_map&lt;string, int&gt; &amp;da, 
+					 unordered_map&lt;string, int&gt; &amp;db, 
+					 string a[], string b[]){
+    auto t = q.front();
+    q.pop();
+    for(int i = 0; i &lt; t.size(); i ++)
+        for(int j = 0; j &lt; n; j ++)
+            if(t.substr(i, a[j].size()) == a[j]){
+                string state = t.substr(0, i) + b[j] + t.substr(i + a[j].size());
+                if(db.count(state)) return da[t] + db[state] + 1;
+                if(da.count(state)) continue;
+                da[state] = da[t] + 1;
+                q.push(state);
+            }
+    return 11;
+}
+int bfs(string A, string B){
+    if(A == B) return 0;
+    queue&lt;string&gt; qa, qb;
+    unordered_map&lt;string, int&gt; da, db;
+    qa.push(A), da[A] = 0;
+    qb.push(B), db[B] = 0;
+    while(qa.size() &amp;&amp; qb.size()){
+        int t;
+        if(qa.size() &lt;= qb.size()) t = extend(qa, da, db, a, b);
+        else t = extend(qb, db, da, b, a);
+        if(t &lt;= 10) return t;
+    }
+    return 11;
+}
+int main(){
+    string A, B;
+    cin &gt;&gt; A &gt;&gt; B;
+    while(cin &gt;&gt; a[n] &gt;&gt; b[n]) n ++;
+    int t = bfs(A, B);
+    if(t &gt; 10) cout &lt;&lt; &quot;NO ANSWER!&quot; &lt;&lt; endl;
+    else cout &lt;&lt; t &lt;&lt; endl;
+    return 0;
+}</code></pre></details></li></ul><ul id="dc770ea1-331d-4f80-9fe3-fa8f0bab2868" class="toggle"><li><details open=""><summary>每一层进行扩展</summary><pre id="9238bc27-82e3-4c06-b866-810f5c0c8553" class="code"><code>#include&lt;iostream&gt;
+#include&lt;algorithm&gt;
+#include&lt;cstring&gt;
+#include&lt;unordered_map&gt;
+#include&lt;queue&gt;
+using namespace std;
+int n;
+string a[6], b[6];
+int extend(queue&lt;string&gt; &amp;q,
+					 unordered_map&lt;string, int&gt; &amp;da, 
+					 unordered_map&lt;string, int&gt; &amp;db, 
+					 string a[], string b[]){
+    int d = da[q.front()];
+    while(q.size() &amp;&amp; da[q.front()] == d){ // 仅扩展一层
+	//for(int i = 0, leni = q.size(); i &lt; leni; i ++){ // 等价写法
+        auto t = q.front();
+        q.pop();
+        for(int i = 0; i &lt; t.size(); i ++)
+            for(int j = 0; j &lt; n; j ++)
+                if(t.substr(i, a[j].size()) == a[j]){
+                    string state = t.substr(0, i) + b[j] + t.substr(i + a[j].size());
+                    if(db.count(state)) return da[t] + db[state] + 1;
+                    if(da.count(state)) continue;
+                    da[state] = da[t] + 1;
+                    q.push(state);
+                }
+    }
+    return 11; // 这一层的扩展没找到，返回大于10的数字
+}
+int bfs(string A, string B){
+    if(A == B) return 0;
+    queue&lt;string&gt; qa, qb;
+    unordered_map&lt;string, int&gt; da, db;
+    qa.push(A), da[A] = 0;
+    qb.push(B), db[B] = 0;
+    int step = 0;
+    while(qa.size() &amp;&amp; qb.size()){
+        int t;
+        if(qa.size() &lt;= qb.size()) t = extend(qa, da, db, a, b);
+        else t = extend(qb, db, da, b, a);
+        if(t &lt;= 10) return t;
+        if(++ step == 10) return -1; // 如果到了第十次还没跳出，则返回-1
+    }
+    return -1;
+}
+int main(){
+    string A, B;
+    cin &gt;&gt; A &gt;&gt; B;
+    while(cin &gt;&gt; a[n] &gt;&gt; b[n]) n ++;
+    int t = bfs(A, B);
+    if(t == -1) cout &lt;&lt; &quot;NO ANSWER!&quot; &lt;&lt; endl;
+    else cout &lt;&lt; t &lt;&lt; endl;
+    return 0;
+}</code></pre></details></li></ul></details></li></ul></div><h1 id="13eda55e-8b6a-488e-b397-d13a072c803b" class="">A*算法</h1><p id="83eb84ed-58eb-45e9-bd3f-7f2ef9077408" class="">应用场景：状态空间十分庞大的情况</p><p id="9ad897e4-b41a-4f41-bbbe-d9b85b960af6" class="">边权是非负的</p><p id="1429737b-1a16-4c2a-8f04-e3e6ca587971" class="">Dijkstra算法可以看成是估计距离都为0的A*算法</p><p id="b4c799ab-20a1-4c58-bcef-33d9bafabda5" class="">优先队列是O(logn)的，队列是O(1)的</p><p id="c514a081-22f3-4d2a-8e83-b6add52e1928" class="">如果无解，那么仍会遍历所有的路径，效率不如朴素的BFS</p><p id="693e1c48-4aa4-48b1-b4b8-173c7797b560" class="">只能保证终点出队时终点是最优的，对其他所有点都“不一定”成立</p><p id="6e606920-1147-4033-82c3-0b5dc2eb53e2" class="">估价函数：启发式搜索</p><h3 id="70bf6d5e-83f2-430a-9597-83c804b1b2aa" class=""><details open=""><summary>179. 八数码</summary></details></h3><div class="indented"><ul id="7dec1359-4c14-4075-94cb-6b91fa68492b" class="toggle"><li><details open=""><summary>题目</summary><p id="ca06c643-a4aa-423a-abdc-b691d835a087" class="">在一个 3×3 的网格中，1 到 8 这 8 个数字和一个 <code>X</code> 恰好不重不漏地分布在这 3×3 的网格中。</p><p id="abf3f71a-e22d-438d-8ddd-6f70086d0424" class="">例如：</p><pre id="e2d83bd9-d36d-4075-9f6f-9d3c0a127939" class="code code-wrap"><code>1 2 3
+X 4 6
+7 5 8</code></pre><p id="108ebf09-0784-48d3-819d-d4b6863dfa27" class="">在游戏过程中，可以把 <code>X</code> 与其上、下、左、右四个方向之一的数字交换（如果存在）。</p><p id="0d684d54-2dce-4c40-a112-46198e9ee596" class="">我们的目的是通过交换，使得网格变为如下排列（称为正确排列）：</p><pre id="d9edfe7c-0773-428a-a5e2-c0d32ecdf546" class="code code-wrap"><code>1 2 3
+4 5 6
+7 8 X</code></pre><p id="f773796e-2e8e-45f2-9b5d-182ce526c8fa" class="">例如，示例中图形就可以通过让 <code>X</code> 先后与右、下、右三个方向的数字交换成功得到正确排列。</p><p id="da61ade5-cee8-4579-a437-90c534b302bc" class="">交换过程如下：</p><pre id="bd6c829e-91a6-499d-8c7f-cadf0a1b511c" class="code code-wrap"><code>1 2 3   1 2 3   1 2 3   1 2 3
+X 4 6   4 X 6   4 5 6   4 5 6
+7 5 8   7 5 8   7 X 8   7 8 X</code></pre><p id="bd6f558d-35cc-4ae1-a5ed-3fd4e88ac921" class="">把 <code>X</code> 与上下左右方向数字交换的行动记录为 <code>u</code>、<code>d</code>、<code>l</code>、<code>r</code>。</p><p id="fa9562a9-7913-41a0-a180-7dad91c64573" class="">现在，给你一个初始网格，请你通过最少的移动次数，得到正确排列。</p><h3 id="0ebf767a-100a-4a81-b45a-dea52a05bed3" class="">输入格式</h3><p id="1e785aaf-2c95-4c54-977a-fd5ab57e10dc" class="">输入占一行，将 3×3 的初始网格描绘出来。</p><p id="0eb6861b-2a16-4a2d-a653-b4e2dca2a7d7" class="">例如，如果初始网格如下所示：</p><pre id="a76e4b9e-68b9-4456-a86b-3c818df5b236" class="code code-wrap"><code>1 2 3
+x 4 6
+7 5 8</code></pre><p id="3ca25a9f-783c-49b2-82dd-659a6d9a601c" class="">则输入为：<code>1 2 3 x 4 6 7 5 8</code></p><h3 id="d72428ef-9c74-40ad-8efe-9f1a7ae48745" class="">输出格式</h3><p id="4a77f488-858e-4b03-85d6-10a2e0dcdbf5" class="">输出占一行，包含一个字符串，表示得到正确排列的完整行动记录。</p><p id="66f0dace-b4ba-4bc2-bb98-47fff4b084ee" class="">如果答案不唯一，输出任意一种合法方案即可。</p><p id="375a9922-514b-4bd5-9185-97e537a1c5ab" class="">如果不存在解决方案，则输出 <code>unsolvable</code>。</p><h3 id="86f541bf-20e8-4f09-bf0d-3c1779e6686d" class="">输入样例：</h3><pre id="7eb57f0e-0032-40f9-a2bb-3c2f8dc7ce6c" class="code code-wrap"><code>2  3  4  1  5  x  7  6  8</code></pre><h3 id="928b9743-ea64-4102-960a-86cc6e514721" class="">输出样例</h3><pre id="13034f3b-1512-4bdc-8e2f-5e620d2e8459" class="code code-wrap"><code>ullddrurdllurdruldr</code></pre></details></li></ul><ul id="84dfdf26-2edc-4285-bc01-882680f844f0" class="toggle"><li><details open=""><summary>解答</summary><pre id="eaa18011-c0a0-4032-b236-d080afafb510" class="code"><code>#include&lt;iostream&gt;
+#include&lt;algorithm&gt;
+#include&lt;cstring&gt;
+#include&lt;queue&gt;
+#include&lt;unordered_map&gt;
+using namespace std;
+int f(string state){
+    int res = 0;
+    for(int i = 0; i &lt; state.size(); i ++)
+        if(state[i] != &#x27;x&#x27;){
+            int t = state[i] - &#x27;1&#x27;;
+            res += abs(i / 3 - t / 3) + abs(i % 3 - t % 3);
+        }
+    return res;
+}
+string bfs(string start){
+    int dx[] = {-1, 0, 1, 0}, dy[] = {0, 1, 0, -1};
+    char op[] = {&#x27;u&#x27;, &#x27;r&#x27;, &#x27;d&#x27;, &#x27;l&#x27;};
+    string end = &quot;12345678x&quot;;
+    unordered_map&lt;string, int&gt; dist;
+    unordered_map&lt;string, pair&lt;string, char&gt;&gt; prev;
+    priority_queue&lt;pair&lt;int, string&gt;, vector&lt;pair&lt;int, string&gt;&gt;, greater&lt;pair&lt;int, string&gt;&gt;&gt; heap;
+    heap.push({f(start), start});
+    dist[start] = 0;
+    while(heap.size()){
+        auto t = heap.top();
+        heap.pop();
+        string state = t.second;
+        if(state == end) {break;}
+        int x, y;
+        for(int i = 0; i &lt; state.size(); i ++)
+            if(state[i] == &#x27;x&#x27;){
+                x = i / 3, y = i % 3;
+                break;
+            }
+        string source = state;
+        for(int i = 0; i &lt; 4; i ++){
+            int sx = x + dx[i], sy = y + dy[i];
+            if(sx &lt; 0 || sx &gt;= 3 || sy &lt; 0 || sy &gt;= 3) continue;
+            swap(state[x * 3 + y], state[sx * 3 + sy]);
+            if(!dist.count(state) || dist[state] &gt; dist[source] + 1){
+                dist[state] = dist[source] + 1;
+                prev[state] = {source, op[i]};
+                heap.push({dist[state] + f(state), state});
+            }
+            swap(state[x * 3 + y], state[sx * 3 + sy]);
+        }
+    }
+    string res;
+    while(end != start)
+    {
+        res += prev[end].second;
+        end = prev[end].first;
+    }
+    reverse(res.begin(), res.end());
+    return res;
+}
+int main(){
+    string start, c, seq;
+    while(cin &gt;&gt; c){
+        start += c;
+        if(c != &quot;x&quot;) seq += c;
+    }
+    int cnt = 0;
+    for(int i = 0; i &lt; seq.size(); i ++)
+        for(int j = i + 1; j &lt; seq.size(); j ++)
+            if(seq[i] &gt; seq[j]) cnt ++;
+    if(cnt % 2) cout &lt;&lt; &quot;unsolvable&quot; &lt;&lt; endl;
+    else cout &lt;&lt; bfs(start) &lt;&lt; endl;
+    return 0;
+}</code></pre></details></li></ul></div></div></article></body></html>

@@ -1,0 +1,817 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>并查集</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="c6a8eb85-51fb-4008-bafe-57bea7837a19" class="page sans"><header><div class="page-header-icon undefined"><span class="icon">🌆</span></div><h1 class="page-title">并查集</h1></header><div class="page-body"><p id="86249f62-12e2-4d03-9b73-7266113dcc06" class="">合并两个集合</p><p id="b139baac-cd13-47db-8d4e-0d5b4b3f9fd6" class="">查询某个元素的祖宗节点</p><p id="89c5dfb2-7834-42f3-a131-b185d84114b8" class="">体现相对关系</p><h3 id="73793a2e-720b-4e03-bf35-bf9a53a6bbfe" class=""><details open=""><summary>1250. 格子游戏</summary></details></h3><div class="indented"><ul id="6c82d658-bb7f-4509-927c-ccb167804ff4" class="toggle"><li><details open=""><summary>题目</summary><p id="2db3053a-c7ff-407b-9a4e-e9d91f9f5ab4" class="">Alice和Bob玩了一个古老的游戏：首先画一个 $n \\times n$ 的点阵（下图 $n = 3$ ）。</p><p id="5cadd907-18c8-4c59-baab-4386252ca97d" class="">接着，他们两个轮流在相邻的点之间画上红边和蓝边：</p><figure id="7134e756-b814-4057-b3c2-f76aac6c760e" class="image"><a href="https://cdn.acwing.com/media/article/image/2019/12/11/19_9edbcf521b-1.png"><img style="width:336px" src="https://cdn.acwing.com/media/article/image/2019/12/11/19_9edbcf521b-1.png"/></a></figure><p id="93e02d8d-c9bb-49bd-b902-24a4c7322dd9" class="">直到围成一个封闭的圈（面积不必为 $1$）为止，“封圈”的那个人就是赢家。因为棋盘实在是太大了，他们的游戏实在是太长了！</p><p id="fbced174-3695-4f7a-b9e8-defbd835b9be" class="">他们甚至在游戏中都不知道谁赢得了游戏。</p><p id="31819213-d2d4-4e2f-a084-a20d6618ac73" class="">于是请你写一个程序，帮助他们计算他们是否结束了游戏？</p><h3 id="700369db-5f30-43f0-8e75-1615258e7820" class="">输入格式</h3><p id="9112b480-82e8-468c-bc4b-9ae498b02a56" class="">输入数据第一行为两个整数 $n$ 和 $m$。$n$表示点阵的大小，$m$ 表示一共画了 $m$ 条线。</p><p id="06e0476b-75e5-4410-bb2f-ea594a40dbd4" class="">以后 $m$ 行，每行首先有两个数字 $(x, y)$，代表了画线的起点坐标，接着用空格隔开一个字符，假如字符是 $D$，则是向下连一条边，如果是 $R$ 就是向右连一条边。</p><p id="ba6c8e2c-8e4f-46f7-95c6-e85d5b37de50" class="">输入数据不会有重复的边且保证正确。</p><h3 id="d770e93e-db65-4c64-ac94-b7ac77ed5dde" class="">输出格式</h3><p id="e2a4e4cd-4138-40aa-be7b-e12cc45ea5e3" class="">输出一行：在第几步的时候结束。</p><p id="b79541c2-26dc-43bc-9f91-1ac4b37d70a9" class="">假如 $m$ 步之后也没有结束，则输出一行“draw”。</p><h3 id="bbaa3669-7344-4c65-9a79-5b28a1af5914" class="">数据范围</h3><p id="bac4a6b0-687f-4964-aba3-b178fd36daca" class="">$1 \\le n \\le 200$，
+$1 \\le m \\le 24000$</p><h3 id="fb006a1a-1adc-4768-9550-dd31dba35379" class="">输入样例：</h3><pre id="178c90e9-4a07-425d-bb22-45a69d89a6b5" class="code code-wrap"><code>3 5
+1 1 D
+1 1 R
+1 2 D
+2 1 R
+2 2 D</code></pre><h3 id="e3e443a9-d623-413a-852f-9f6e17f48403" class="">输出样例：</h3><pre id="dcc4e655-aba5-4f04-8c7d-442e45b9f748" class="code code-wrap"><code>4</code></pre></details></li></ul><ul id="4e0e54aa-c182-406e-911c-fad41a733024" class="toggle"><li><details open=""><summary>解答</summary><pre id="ac10ffa7-806e-4fdc-82b7-c6e31ea6a3af" class="code"><code>#include&lt;iostream&gt;
+using namespace std;
+const int N = 40010;
+int p[N];
+int n, m, res;
+int find(int x){
+    if(p[x] != x) p[x] = find(p[x]);
+    return p[x];
+}
+int get(int a, int b){
+    return a * n + b;
+}
+int main(){
+    cin &gt;&gt; n &gt;&gt; m;
+    for(int i = 0; i &lt; n * n; i ++) p[i] = i;
+    for(int i = 1; i &lt;= m; i ++){
+        int a, b;
+        char d;
+        cin &gt;&gt; a &gt;&gt; b &gt;&gt; d;
+        a --, b --;
+        int x = get(a, b);
+        int y;
+        if(d == &#x27;R&#x27;) y = get(a, b + 1);
+        else y = get(a + 1, b);
+        int px = find(x), py = find(y);
+        if(px == py){
+            res = i;
+            break;
+        }
+        p[px] = py;
+    }
+    if(!res) cout &lt;&lt; &quot;draw&quot; &lt;&lt; endl;
+    else cout &lt;&lt; res &lt;&lt; endl;
+    return 0;
+}</code></pre></details></li></ul></div><h3 id="ce3a6077-458f-438b-8072-8321eb7befaf" class=""><details open=""><summary><strong>1252. 搭配购买</strong></summary></details></h3><div class="indented"><ul id="45b32e58-6533-4d27-8113-2d5c6c1814c0" class="toggle"><li><details open=""><summary>题目</summary></details></li></ul><ul id="597b99ef-fed3-4cd9-832e-0669315c9e45" class="toggle"><li><details open=""><summary>解答</summary></details></li></ul></div><h3 id="90152e2c-8996-48a3-8f49-c391df97e93a" class=""><details open=""><summary><strong>237. 程序自动分析</strong></summary></details></h3><div class="indented"><ul id="bb115b78-6317-4b5c-9854-ff82d034c30d" class="toggle"><li><details open=""><summary>题目</summary><p id="9b8b56ac-e80c-46fc-ad27-33a07630da65" class="">在实现程序自动分析的过程中，常常需要判定一些约束条件是否能被同时满足。</p><p id="61057a36-daa4-4459-b0c1-64b594a57c05" class="">考虑一个约束满足问题的简化版本：假设 x1,x2,x3,… 代表程序中出现的变量，给定 nn 个形如 xi=xj 或 xi≠xj 的变量相等/不等的约束条件，请判定是否可以分别为每一个变量赋予恰当的值，使得上述所有约束条件同时被满足。</p><p id="f49f7975-ed8e-4dae-a2d7-ce55f0f0cfa3" class="">例如，一个问题中的约束条件为：x1=x2，x2=x3，x3=x4，x1≠x4，这些约束条件显然是不可能同时被满足的，因此这个问题应判定为不可被满足。</p><p id="d9bf275c-980b-4b07-a5fe-0aaf9154af3d" class="">现在给出一些约束满足问题，请分别对它们进行判定。</p><h3 id="6e9762df-5e15-4bb0-b5c5-f46664081907" class="">输入格式</h3><p id="3078579d-1aec-4cf0-98e9-6d35dd3c907f" class="">输入文件的第 1 行包含 1 个正整数 t，表示需要判定的问题个数，注意这些问题之间是相互独立的。</p><p id="80a2c826-6657-43b0-82fb-714b8ded5116" class="">对于每个问题，包含若干行：</p><p id="6662e309-a9b9-4076-b9bb-1f965f4fb2e1" class="">第 1 行包含 1 个正整数 n，表示该问题中需要被满足的约束条件个数。</p><p id="a22a45e8-0817-4ef5-bcb1-3a777a7712de" class="">接下来 n 行，每行包括 3 个整数 i,j,e，描述 1 个相等/不等的约束条件，相邻整数之间用单个空格隔开。若 e=1，则该约束条件为 xi=xj；若 e=0，则该约束条件为 xi≠xj。</p><h3 id="d211ec9c-87aa-48f9-83c5-0c0f06e85e94" class="">输出格式</h3><p id="71e586b4-e560-4b87-9582-79629bf67b26" class="">输出文件包括 t 行。</p><p id="d857bfa4-3a2d-400f-b1ee-56d3912a37d7" class="">输出文件的第 k 行输出一个字符串 <code>YES</code> 或者 <code>NO</code>，<code>YES</code> 表示输入中的第 $k$ 个问题判定为可以被满足，<code>NO</code> 表示不可被满足。</p><h3 id="12f175dc-cb29-4a07-8f39-e32a3d2e0b80" class="">数据范围</h3><p id="00fb3073-28ce-4d64-9863-4670d022565a" class="">1≤n≤105</p><p id="1c78a943-f82b-4253-ac69-3712c3681f9f" class="">1≤i,j≤109</p><h3 id="f051ed4c-b1be-4ed2-b567-0cae532074d4" class="">输入样例：</h3><pre id="2b8fed80-adbb-4150-890b-8bfd77e1e68c" class="code code-wrap"><code>2
+2
+1 2 1
+1 2 0
+2
+1 2 1
+2 1 1</code></pre><h3 id="1c86f4eb-9a78-4fb6-980d-01ee02d1accb" class="">输出样例：</h3><pre id="ec9acc94-25d5-4d60-afd6-32f46f249eb3" class="code code-wrap"><code>NO
+YES</code></pre></details></li></ul><ul id="ca04d7a1-8092-4872-8761-5ac8f6e36fc1" class="toggle"><li><details open=""><summary>解答</summary><pre id="c29b2670-77e4-4900-ae05-e8905319eceb" class="code"><code>#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;cstring&gt;
+#include &lt;unordered_map&gt;
+using namespace std;
+const int N = 200010;
+int p[N];
+int n, m;
+unordered_map&lt;int, int&gt; S;
+struct Query{
+    int a, b, e;
+} query[N];
+int get(int x){
+    if(S.count(x) == 0) S[x] = ++ n;
+    return S[x];
+}
+int find(int x){
+    if(p[x] != x) p[x] = find(p[x]);
+    return p[x];
+}
+int main(){
+    int T;
+    scanf(&quot;%d&quot;, &amp;T);
+    while(T --){
+        scanf(&quot;%d&quot;, &amp;m);
+        S.clear();
+        n = 0;
+        for(int i = 0; i &lt; m; i ++){
+            int a, b, e;
+            scanf(&quot;%d%d%d&quot;, &amp;a, &amp;b, &amp;e);
+            query[i] = {get(a), get(b), e};
+        }
+        for(int i = 1; i &lt;= n; i ++) p[i] = i;
+        for(int i = 0; i &lt; m; i ++)
+            if(query[i].e == 1){
+                int pa = find(query[i].a), pb = find(query[i].b);
+                p[pa] = pb;
+            }
+        bool sign = false;
+        for(int i = 0; i &lt; m; i ++)
+            if(query[i].e == 0){
+                int pa = find(query[i].a), pb = find(query[i].b);
+                if(pa == pb){
+                    sign = true;
+                    break;
+                }
+            }
+        if(sign) puts(&quot;NO&quot;);
+        else puts(&quot;YES&quot;);
+    }
+    return 0;
+}</code></pre></details></li></ul><p id="a6049fcb-abce-48bb-bba8-85efe83fa787" class="">
+</p></div><h3 id="4ddc629b-08ae-4bb3-b3c5-186e4b172dda" class=""><details open=""><summary><strong>238. 银河英雄传说</strong></summary></details></h3><div class="indented"><ul id="8e45e62b-31b1-4fda-bb39-b6e0c3389e85" class="toggle"><li><details open=""><summary>题目</summary><p id="758919e4-4a96-4c56-8ee2-c59c7f7018d7" class="">有一个划分为 N 列的星际战场，各列依次编号为 1,2,…,N。</p><p id="770b35cd-108f-4fdd-97c9-5f7858b38d89" class="">有 N 艘战舰，也依次编号为 1,2,…,N，其中第 i 号战舰处于第 i 列。</p><p id="4578b4d4-9fbd-4db0-a875-c2f1f8c77d8c" class="">有 T 条指令，每条指令格式为以下两种之一：</p><ol type="1" id="ca79fca7-4e2d-400e-8b1b-c955e43f7944" class="numbered-list" start="1"><li><code>M i j</code>，表示让第 i 号战舰所在列的全部战舰保持原有顺序，接在第 j 号战舰所在列的尾部。</li></ol><ol type="1" id="e326d8ca-33c8-45f5-8b77-37ee9a65deb5" class="numbered-list" start="2"><li><code>C i j</code>，表示询问第 i 号战舰与第 j 号战舰当前是否处于同一列中，如果在同一列中，它们之间间隔了多少艘战舰。</li></ol><p id="226345fe-7248-4d79-9cef-b692db9ccec1" class="">现在需要你编写一个程序，处理一系列的指令。</p><h3 id="0dd8c8e7-54a0-4436-ad63-7904c4ea5433" class="">输入格式</h3><p id="f3ed304e-aa15-416d-a69f-6e842793aae6" class="">第一行包含整数 T，表示共有 T 条指令。</p><p id="ac8750c4-b02e-436d-85b3-ed58f074335f" class="">接下来 T 行，每行一个指令，指令有两种形式：<code>M i j</code> 或 <code>C i j</code>。</p><p id="888559cb-c370-4b15-a07b-0aa23fa72b15" class="">其中 M 和 C 为大写字母表示指令类型，i 和 j 为整数，表示指令涉及的战舰编号。</p><h3 id="c3615ea2-8008-4b6d-a221-694a4f47b1d9" class="">输出格式</h3><p id="312bf04d-8a9b-4c7e-83f7-459730c65d09" class="">你的程序应当依次对输入的每一条指令进行分析和处理：</p><p id="d96fdf9a-dec6-4b85-9da0-c10b3300c97e" class="">如果是 <code>M i j</code> 形式，则表示舰队排列发生了变化，你的程序要注意到这一点，但是不要输出任何信息；</p><p id="af6a8ca3-2040-4e4f-b6dd-e8676a6bd5e6" class="">如果是 <code>C i j</code> 形式，你的程序要输出一行，仅包含一个整数，表示在同一列上，第 i 号战舰与第 j 号战舰之间布置的战舰数目，如果第 i 号战舰与第 j 号战舰当前不在同一列上，则输出 -1。</p><h3 id="daf22e35-bbe0-462a-8ab7-8bbd1cc6dfe6" class="">数据范围</h3><p id="388b1f43-7363-4f55-8cf2-e11b636afda6" class="">N ≤ 30000 , T ≤ 500000</p><h3 id="f2d21c0e-4136-444c-860e-ff6685bf4bec" class="">输入样例：</h3><pre id="1a6b0aea-5ce4-4b50-b18b-96e041a9ef91" class="code code-wrap"><code>4
+M 2 3
+C 1 2
+M 2 4
+C 4 2</code></pre><h3 id="481d589b-7705-4dd8-97ac-91c7b7a512cb" class="">输出样例：</h3><pre id="b5bfb1d1-5847-4f29-b3b1-65cb6c03eb4a" class="code code-wrap"><code>-1
+1</code></pre></details></li></ul><ul id="90a6ac87-f68b-4815-b695-7103c239f9af" class="toggle"><li><details open=""><summary>解答</summary><p id="2cd688d5-0f8a-43a2-9ee2-76d92c4a7502" class="">不问战舰的距离的话，只需要维护一个并查集</p><p id="be013a74-326b-4c46-8440-78df65479ec9" class="">可以统一维护一个前缀数组，当前战舰到根战舰的距离</p><pre id="fd491211-b96f-4237-8a36-cad40d31cc71" class="code"><code>#include&lt;iostream&gt;
+#include&lt;algorithm&gt;
+using namespace std;
+const int N = 300010;
+int m, p[N], sz[N], d[N];
+int find(int x){
+    if(x != p[x]){
+        int root = find(p[x]);
+        d[x] += d[p[x]];
+        p[x] = root;
+    }
+    return p[x];
+}
+int main(){
+    cin &gt;&gt; m;
+    for(int i = 0; i &lt; N; i ++){
+        p[i] = i;
+        sz[i] = 1;
+    }
+    while(m --){
+        char op;
+        int a, b;
+        cin &gt;&gt; op &gt;&gt; a &gt;&gt; b;
+        if(op == &#x27;M&#x27;){
+            int pa = find(a), pb = find(b);
+            if(pa != pb){
+                d[pa] = sz[pb];
+                sz[pb] += sz[pa];
+                p[pa] = pb;
+            }
+        } else {
+            int pa = find(a), pb = find(b);
+            if(pa != pb) puts(&quot;-1&quot;);
+            else printf(&quot;%d\n&quot;, max(0, abs(d[a] - d[b]) - 1));
+        }
+    }
+    return 0;
+}</code></pre></details></li></ul></div><h3 id="870a0631-ab06-48a8-8802-e2d266eab5ee" class=""><details open=""><summary><strong>239. 奇偶游戏</strong></summary></details></h3><div class="indented"><ul id="de5decd2-1a98-4f4b-a1bf-b07ae292b874" class="toggle"><li><details open=""><summary>题目</summary><p id="65bcb7e2-7757-4f0f-9087-d08aad698293" class="">小 $A$ 和小 $B$ 在玩一个游戏。</p><p id="aa1f899f-8411-45fd-a3e9-0c457b32ef2d" class="">首先，小 $A$ 写了一个由 $0$ 和 $1$ 组成的序列 $S$，长度为 $N$。</p><p id="9e7d741e-cb62-4643-a2ee-c3ebbd875611" class="">然后，小 $B$ 向小 $A$ 提出了 $M$ 个问题。</p><p id="43c3bd69-bc7e-4786-bffa-04c2337747aa" class="">在每个问题中，小 $B$ 指定两个数 $l$ 和 $r$，小 $A$ 回答 $S\[l \\sim r\]$ 中有奇数个 $1$ 还是偶数个 $1$。</p><p id="25bb75c8-4b35-4e35-806f-371e593c02da" class="">机智的小 $B$ 发现小 $A$ 有可能在撒谎。</p><p id="f04f597b-89d0-4d85-b6d1-8da47c4c45e6" class="">例如，小 $A$ 曾经回答过 $S\[1 \\sim 3\]$ 中有奇数个 $1$，$S\[4 \\sim 6\]$ 中有偶数个 $1$，现在又回答 $S\[1 \\sim 6\]$ 中有偶数个 $1$，显然这是自相矛盾的。</p><p id="ba4a2e96-d73f-417c-89bd-8f044da20f27" class="">请你帮助小 $B$ 检查这 $M$ 个答案，并指出在至少多少个回答之后可以确定小 $A$ 一定在撒谎。</p><p id="d48370e0-0586-4094-8a6c-6062970ffe96" class="">即求出一个最小的 $k$，使得 $01$ 序列 $S$ 满足第 $1 \\sim k$ 个回答，但不满足第 $1 \\sim k+1$ 个回答。</p><h3 id="ee4dd893-82d1-4d9e-847b-c687cb002a88" class="">输入格式</h3><p id="46588762-98bd-4f73-87ca-401af4f697a6" class="">第一行包含一个整数 $N$，表示 $01$ 序列长度。</p><p id="f5d39e60-e341-45ab-981d-7e285e71f210" class="">第二行包含一个整数 $M$，表示问题数量。</p><p id="0c2e3f3f-8746-40e6-98dc-83a3e56e5685" class="">接下来 $M$ 行，每行包含一组问答：两个整数 $l$ 和 $r$，以及回答 <code>even</code> 或 <code>odd</code>，用以描述 $S\[l \\sim r\]$ 中有偶数个 $1$ 还是奇数个 $1$。</p><h3 id="c3dca835-e2fa-44fb-b44d-ab32bf8ed3a9" class="">输出格式</h3><p id="a433779f-8f4a-4049-8dea-9a74ede96862" class="">输出一个整数 $k$，表示 $01$ 序列满足第 $1 \\sim k$ 个回答，但不满足第 $1 \\sim k+1$ 个回答，如果 $01$ 序列满足所有回答，则输出问题总数量。</p><h3 id="25c87d3a-ce69-48d1-93d6-52973c24fc1f" class="">数据范围</h3><p id="8013f724-6269-427c-a483-dcff72ed726b" class="">$N \\le 10^9 , M \\le 5000$</p><h3 id="ae518a84-97a2-4e4f-bce8-5fbbc1661fe9" class="">输入样例：</h3><pre id="59cf00e0-65fd-4d43-a62d-7faa9a2b1b06" class="code code-wrap"><code>10
+5
+1 2 even
+3 4 odd
+5 6 even
+1 6 even
+7 10 odd</code></pre><h3 id="5f020ea8-7fde-4801-98b3-b01400033596" class="">输出样例：</h3><pre id="d0cdcd26-bfc6-49dd-be9c-1f75bec528ff" class="code code-wrap"><code>3</code></pre></details></li></ul><ul id="dfb541eb-f2f9-4e7c-b298-5721464bd501" class="toggle"><li><details open=""><summary>解答</summary></details></li></ul></div><p id="c6465721-927a-4d3d-b2a0-c70b171fc54c" class="">带边权的并查集，维护相对关系（与根节点的关系）</p><p id="579f5907-091a-49c7-a40c-e9ccafa7ba54" class="">d[x]表示x与p[x]的关系，1表示不同类，0表示同类</p><p id="9db0bcf7-c288-4331-a8d0-e1f9667c38b4" class="">传递性，对称性与反对称性（无向的），可以用并查集来解决</p><p id="13cbc355-c541-41b5-85f2-a9e6e304d1a2" class="">
+</p><p id="fc33d900-3fd0-4387-95ee-d5f5c987a865" class="">扩展域并查集</p><p id="56a4d2fb-f20b-4c2a-8571-c29408d38d23" class=""><a href="https://www.acwing.com/activity/content/problem/content/1582/">https://www.acwing.com/activity/content/problem/content/1582/</a></p><p id="b7313afc-4171-48ae-98ac-c985586aff84" class=""><a href="https://www.acwing.com/solution/content/29308/">https://www.acwing.com/solution/content/29308/</a></p></div></article></body></html>

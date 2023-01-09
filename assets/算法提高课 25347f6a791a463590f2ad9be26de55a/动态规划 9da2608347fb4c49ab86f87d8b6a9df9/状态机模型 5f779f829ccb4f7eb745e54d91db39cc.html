@@ -1,0 +1,762 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>状态机模型</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="5f779f82-9ccb-4f7e-b745-e54d91db39cc" class="page sans"><header><div class="page-header-icon undefined"><span class="icon">🤖</span></div><h1 class="page-title">状态机模型</h1></header><div class="page-body"><h3 id="de9dbd2f-7289-4952-a3b0-90d3b12eff1e" class=""><details open=""><summary><strong>1049. 大盗阿福</strong></summary></details></h3><div class="indented"><ul id="3c086136-8518-4dbc-9a42-bc38dd7ffb85" class="toggle"><li><details open=""><summary>题目</summary><p id="2b612b93-b3cf-420b-9508-f0adbaebcb73" class="">阿福是一名经验丰富的大盗。趁着月黑风高，阿福打算今晚洗劫一条街上的店铺。</p><p id="a31dddf8-62ce-4b3e-9a04-386ed5a51cc6" class="">这条街上一共有 $N$ 家店铺，每家店中都有一些现金。</p><p id="900749e2-1bed-47d4-89c7-48135437f207" class="">阿福事先调查得知，只有当他同时洗劫了两家相邻的店铺时，街上的报警系统才会启动，然后警察就会蜂拥而至。</p><p id="041103c6-cc4f-4b47-81c8-dd2eb942505d" class="">作为一向谨慎作案的大盗，阿福不愿意冒着被警察追捕的风险行窃。</p><p id="f845c8f4-2868-43ce-bd80-6cfaa7c4076d" class="">他想知道，在不惊动警察的情况下，他今晚最多可以得到多少现金？</p><h3 id="493dcdb4-6a3f-452a-aff1-64681a82ea9a" class="">输入格式</h3><p id="bc1aca12-2160-4800-b6db-3d3f1485ca83" class="">输入的第一行是一个整数 $T$，表示一共有 $T$ 组数据。</p><p id="56d8307e-2eae-44b3-9ee2-3a531d35615a" class="">接下来的每组数据，第一行是一个整数 $N$ ，表示一共有 $N$ 家店铺。</p><p id="a3c832bf-49df-4c5e-87e0-8a8aa09198dc" class="">第二行是 $N$ 个被空格分开的正整数，表示每一家店铺中的现金数量。</p><p id="35020f78-adc3-49e3-898e-e0624ab2391a" class="">每家店铺中的现金数量均不超过1000。</p><h3 id="b1ac885b-5749-47cc-a91b-fae3185e6c00" class="">输出格式</h3><p id="ccc678ec-32da-49b8-ade3-1485750bdbc9" class="">对于每组数据，输出一行。</p><p id="be540608-1842-4120-8e5d-89645b5153b0" class="">该行包含一个整数，表示阿福在不惊动警察的情况下可以得到的现金数量。</p><h3 id="69419a8a-f06d-4d58-b5da-71ab784cfec9" class="">数据范围</h3><p id="9493d620-78d6-455e-8f04-46d94b0c60f2" class="">$1 \\le T \\le 50$,
+$1 \\le N \\le 10^5$</p><h3 id="d620b4b6-6ac1-4a15-a878-064a1d75d991" class="">输入样例：</h3><pre id="af205901-feac-46b0-91f5-e74c9e86c00f" class="code code-wrap"><code>2
+3
+1 8 2
+4
+10 7 6 14
+</code></pre><h3 id="cea4c019-a8a9-4232-948a-d65505c9e091" class="">输出样例：</h3><pre id="73108803-d93c-45fa-8624-d2db846fa0b0" class="code code-wrap"><code>8
+24
+</code></pre><h3 id="be7e1a6e-9945-4fa6-9d3d-2f8f58ae819f" class="">样例解释</h3><p id="fc052ee5-7a34-47a5-91ba-c4521400905d" class="">对于第一组样例，阿福选择第2家店铺行窃，获得的现金数量为8。</p><p id="1f08fec9-2eb6-4ece-a7f6-825ee77dddb8" class="">对于第二组样例，阿福选择第1和4家店铺行窃，获得的现金数量为10+14=24。</p></details></li></ul><ul id="26dbf474-3fa3-4bfb-9310-1a945f02d1ec" class="toggle"><li><details open=""><summary>解答</summary><pre id="4890c69e-98ba-48f5-bf86-4ab33bfebe0f" class="code"><code>#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+
+using namespace std;
+
+const int N = 100010;
+
+int n;
+int w[N], f[N][2];
+
+int main()
+{
+    int T;
+    scanf(&quot;%d&quot;, &amp;T);
+    while (T -- )
+    {
+        scanf(&quot;%d&quot;, &amp;n);
+        for (int i = 1; i &lt;= n; i ++ ) scanf(&quot;%d&quot;, &amp;w[i]);
+
+        for (int i = 1; i &lt;= n; i ++ )
+        {
+            f[i][0] = max(f[i - 1][0], f[i - 1][1]);
+            f[i][1] = f[i - 1][0] + w[i];
+        }
+
+        printf(&quot;%d\n&quot;, max(f[n][0], f[n][1]));
+    }
+
+    return 0;
+}</code></pre></details></li></ul><p id="fe617b07-ca65-4d73-ad47-e0de4bb3be22" class="">
+</p></div><h3 id="5ecf6827-cf88-4f3c-81dd-3806d43f8d55" class=""><details open=""><summary><strong>1057. 股票买卖 IV</strong></summary></details></h3><div class="indented"><ul id="e23cca94-e561-4a6c-af71-0b641bd06aeb" class="toggle"><li><details open=""><summary>题目</summary><p id="ad7b75bb-c1e7-4017-aded-d848f6da7f5e" class="">给定一个长度为 $N$ 的数组，数组中的第 $i$ 个数字表示一个给定股票在第 $i$ 天的价格。</p><p id="5e48202b-2e3a-45c9-937e-afa64050b7e2" class="">设计一个算法来计算你所能获取的最大利润，你最多可以完成 $k$ 笔交易。</p><p id="26aaaa61-de74-4e61-acf8-992330b8a1e1" class="">注意：你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。一次买入卖出合为一笔交易。</p><h3 id="d9867637-07c0-4248-bb78-3b37aa39dc75" class="">输入格式</h3><p id="03a0e1a7-a60c-45cf-ab60-7d6143a0a23b" class="">第一行包含整数 $N$ 和 $k$，表示数组的长度以及你可以完成的最大交易笔数。</p><p id="308adaad-381b-4c8c-be12-b1b154e47b21" class="">第二行包含 $N$ 个不超过 $10000$ 的正整数，表示完整的数组。</p><h3 id="d90b9983-347e-40ea-b1d6-bbe5f88aefbb" class="">输出格式</h3><p id="ab7ff1a0-eafa-4cbe-b73a-9d2f344174c7" class="">输出一个整数，表示最大利润。</p><h3 id="11e5ead1-500d-4b27-8daa-de3ad2f89f84" class="">数据范围</h3><p id="7f5c9921-453b-469e-87f3-b50f77c4b11e" class="">$1 \\le N \\le 10^5$,
+$1 \\le k \\le 100$</p><h3 id="77f61bc7-42a5-4100-a1aa-5ceea11d8972" class="">输入样例1：</h3><pre id="5747e112-27f9-4e96-b0f7-c777e52820a4" class="code code-wrap"><code>3 2
+2 4 1
+</code></pre><h3 id="923f8090-8221-4fdc-9a4c-60aafe3a4d86" class="">输出样例1：</h3><pre id="5d1e94a0-4dd5-4b2e-8a03-dbe6bf400b37" class="code code-wrap"><code>2
+</code></pre><h3 id="3fe9cd9d-7ea7-4abe-96f8-b74ac45a53ef" class="">输入样例2：</h3><pre id="366cace6-db50-41d3-9652-9d3b8f1db45f" class="code code-wrap"><code>6 2
+3 2 6 5 0 3
+</code></pre><h3 id="7fb7d50d-f8da-462a-b44e-9a4ea069c0f8" class="">输出样例2：</h3><pre id="c9288256-3b9d-4684-b3d9-4eb71c70d68f" class="code code-wrap"><code>7
+</code></pre><h3 id="c3645542-6030-4fb8-bd9e-c0ce76a0d87c" class="">样例解释</h3><p id="461bde95-9a97-4648-a88b-3e701a53033c" class="">样例1：在第 1 天 (股票价格 = 2) 的时候买入，在第 2 天 (股票价格 = 4) 的时候卖出，这笔交易所能获得利润 = 4-2 = 2 。</p><p id="4325e45b-7bc3-4b3f-9feb-96dd515d8351" class="">样例2：在第 2 天 (股票价格 = 2) 的时候买入，在第 3 天 (股票价格 = 6) 的时候卖出, 这笔交易所能获得利润 = 6-2 = 4 。随后，在第 5 天 (股票价格 = 0) 的时候买入，在第 6 天 (股票价格 = 3) 的时候卖出, 这笔交易所能获得利润 = 3-0 = 3 。共计利润 4+3 = 7.</p></details></li></ul><ul id="f60b1cec-077c-4490-a79e-6fdc64fbc2c5" class="toggle"><li><details open=""><summary>解答</summary><pre id="165169d1-49e5-4fa9-9fde-3ef4fb7e7fb8" class="code"><code>#include&lt;iostream&gt;
+#include&lt;cstring&gt;
+const int N = 100010, M = 110;
+int f[N][M][2], w[N];
+int n, m;
+using namespace std;
+int main(){
+    cin &gt;&gt; n &gt;&gt; m;
+    for(int i = 1; i &lt;= n; i ++) cin &gt;&gt; w[i];
+    memset(f, -0x3f, sizeof f);
+    for(int i = 0; i &lt;= n; i ++) f[i][0][0] = 0;//昨天没有交易，初始化为0
+    for(int i = 1; i &lt;= n; i ++)
+        for(int j = 1; j &lt;= m; j ++){
+						//我们将买入一次看做交易次数加一
+            f[i][j][0] = max(f[i - 1][j][0], f[i - 1][j][1] + w[i]);
+						//第i天状态是空仓状态(j=0)，则第i天可能产生的行为是卖出行为或空仓行为
+            f[i][j][1] = max(f[i - 1][j][1], f[i - 1][j - 1][0] - w[i]);
+						//第i天状态是持仓状态(j=1)，则第i天可能产生的行为是买入行为或持仓行为
+        }
+    int res = 0; // 不能亏本
+    for(int i = 0; i &lt;= m; i ++) res = max(res, f[n][i][0]);
+    cout &lt;&lt; res ;
+    return 0;
+}</code></pre></details></li></ul></div><h3 id="39291a0c-36bf-49fd-8b98-42bde0a4dee2" class=""><details open=""><summary><strong><strong>1058. 股票买卖 V</strong></strong></summary></details></h3><div class="indented"><ul id="99174e36-8570-45a6-9e08-ae9cc5c461ae" class="toggle"><li><details open=""><summary>题目</summary><p id="0c520f4c-0fa4-4dc2-8f86-84da15fdd811" class="">给定一个长度为 $N$ 的数组，数组中的第 $i$ 个数字表示一个给定股票在第 $i$ 天的价格。</p><p id="7b88ebf9-c69a-4ec1-80f4-57555d292574" class="">设计一个算法计算出最大利润。在满足以下约束条件下，你可以尽可能地完成更多的交易（多次买卖一支股票）:</p><ul id="00d3a59f-8131-4814-a01f-89e22822195c" class="bulleted-list"><li style="list-style-type:disc">你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。</li></ul><ul id="266cc360-bdf4-4521-bbea-2b1ab01613d4" class="bulleted-list"><li style="list-style-type:disc">卖出股票后，你无法在第二天买入股票 (即冷冻期为 $1$ 天)。</li></ul><h3 id="2630d087-db5a-4ba2-aee4-9c3c2bbce922" class="">输入格式</h3><p id="3a3485cd-ea5a-46b8-8685-44f0a429a69e" class="">第一行包含整数 $N$，表示数组长度。</p><p id="04ecfb24-ef77-4454-a90c-73e01d2e785c" class="">第二行包含 $N$ 个不超过 $10000$ 的正整数，表示完整的数组。</p><h3 id="85d46bee-9dcc-4081-9e0c-9e2f5185ab70" class="">输出格式</h3><p id="d735065e-57ec-487c-9326-065c890504fb" class="">输出一个整数，表示最大利润。</p><h3 id="d4a449c8-f851-45c4-8c90-891e0b219a0a" class="">数据范围</h3><p id="ad5d9303-9d36-4811-bb83-79b8ea52bf78" class="">$1 \\le N \\le 10^5$</p><h3 id="79f9daef-6e3b-4c59-9b1a-6ec54aa9b728" class="">输入样例：</h3><pre id="fa4849db-4b36-4fd1-9a80-fab4945fb225" class="code code-wrap"><code>5
+1 2 3 0 2
+</code></pre><h3 id="7c99c1d2-0c41-4157-a2d0-8e8e8e8721a4" class="">输出样例：</h3><pre id="2d562084-926b-4fa3-b61e-d53ddab7e7be" class="code code-wrap"><code>3
+</code></pre><h3 id="42aa2911-5182-45f4-bf80-ecc6079917fe" class="">样例解释</h3><p id="af91b554-88b2-41c5-9a91-573b947c6519" class="">对应的交易状态为: \[买入, 卖出, 冷冻期, 买入, 卖出\]，第一笔交易可得利润 2-1 = 1，第二笔交易可得利润 2-0 = 2，共得利润 1+2 = 3。</p></details></li></ul><ul id="906d7451-8e6e-41c8-9a97-fcb993dbc6bc" class="toggle"><li><details open=""><summary>解答</summary><figure id="0b8e9be2-1cad-4a6d-9aae-66e5bf6526fe" class="image"><a href="%E7%8A%B6%E6%80%81%E6%9C%BA%E6%A8%A1%E5%9E%8B%205f779f829ccb4f7eb745e54d91db39cc/Untitled.png"><img style="width:1309px" src="%E7%8A%B6%E6%80%81%E6%9C%BA%E6%A8%A1%E5%9E%8B%205f779f829ccb4f7eb745e54d91db39cc/Untitled.png"/></a></figure><pre id="240360e3-7e98-435e-843e-99a4bb7dfd05" class="code"><code>#include&lt;iostream&gt;
+#include&lt;cstring&gt;
+using namespace std;
+const int N = 100010, INF = 0x3f3f3f3f;
+int f[N][3], w[N];
+int n;
+int main (){
+    cin &gt;&gt; n;
+    for(int i = 1; i &lt;= n; i ++) cin &gt;&gt; w[i];
+    f[0][0] = f[0][1] = -INF;
+    f[0][2] = 0;
+    for(int i = 1; i &lt;= n; i ++){
+        f[i][0] = max(f[i - 1][0], f[i - 1][2] - w[i]);
+        f[i][1] = f[i - 1][0] + w[i];
+        f[i][2] = max(f[i - 1][1], f[i - 1][2]);
+    }
+    cout &lt;&lt; max(f[n][1], f[n][2]) &lt;&lt; endl;
+		// 如果股票的价格是单调下降的，那么最好的策略是一次交易也不做
+		// 取两个出口的max
+    return 0;
+}</code></pre></details></li></ul><p id="75cbda2f-4505-4a79-bf44-6e43d72a4317" class="">
+</p></div><h3 id="13ce7da4-bd10-43e5-9629-6bedd9c153eb" class=""><details open=""><summary><strong><strong>1052. 设计密码</strong></strong></summary></details></h3><div class="indented"><ul id="37b25a86-d187-41f3-a030-9556b69d0a9c" class="toggle"><li><details open=""><summary>题目</summary></details></li></ul><ul id="c8c63f60-ae36-4d79-9999-0e49f2ebe70f" class="toggle"><li><details open=""><summary>解答</summary><p id="56039dfc-2ea0-4eb7-ac6e-efc797ce6d2c" class="">AC自动机=Trie+KMP</p></details></li></ul></div><p id="2275af4e-2537-47bf-b187-d431aa6d3cb2" class="">
+</p></div></article></body></html>
