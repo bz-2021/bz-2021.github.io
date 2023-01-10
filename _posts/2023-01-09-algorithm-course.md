@@ -2,7 +2,7 @@
 title: 算法提高课笔记
 date: 2023-01-09 00:00:00 +0800
 categories: [Note, Algorithm]
-tags: [favicon]
+tags: [algorithm, acwing, public]
 ---
 
 ## [**查看笔记**](https://bz-2021.github.io/notion/algorithm_note.html) 

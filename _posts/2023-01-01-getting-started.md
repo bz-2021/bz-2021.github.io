@@ -2,7 +2,7 @@
 title: Jekyll部署至GitHub Pages建立个人网站保姆级指北
 date: 2023-01-01 07:00:00 +0800
 categories: [Blogging, Tutorial]
-tags: [getting started]
+tags: [getting started, public]
 ---
 
 ## Prerequisites
